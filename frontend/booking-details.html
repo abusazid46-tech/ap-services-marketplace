@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Details - AP Services</title>
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Booking Details Specific Styles -->
+    <style>
+        .booking-details-page {
+            background: var(--gray-50);
+            min-height: calc(100vh - var(--header-height) - var(--footer-height));
+            padding: var(--spacing-xl) 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            margin-bottom: var(--spacing-lg);
+            color: var(--gray-600);
+            background: white;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--radius-full);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .breadcrumb a {
+            color: var(--gray-600);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-600);
+        }
+
+        .breadcrumb i {
+            font-size: 0.8rem;
+        }
+
+        .breadcrumb .active {
+            color: var(--primary-600);
+            font-weight: 600;
+        }
+
+        /* Header */
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+
+        .booking-header h1 {
+            font-size: 2rem;
+            color: var(--gray-800);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+        }
+
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-badge.confirmed {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-badge.completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-badge.in-progress {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        /* Main Grid */
+        .details-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: var(--spacing-xl);
+        }
+
+        /* Cards */
+        .detail-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            margin-bottom: var(--spacing-lg);
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .card-title i {
+            color: var(--primary-600);
+        }
+
+        /* Service Info */
+        .service-info {
+            display: flex;
+            gap: var(--spacing-lg);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .service-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--primary-100);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-700);
+            font-size: 2rem;
+        }
+
+        .service-details h2 {
+            font-size: 1.5rem;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .service-meta {
+            display: flex;
+            gap: var(--spacing-md);
+            color: var(--gray-600);
+            flex-wrap: wrap;
+        }
+
+        .service-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Worker Profile */
+        .worker-profile {
+            display: flex;
+            gap: var(--spacing-lg);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .worker-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--primary-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-700);
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .worker-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 4px;
+        }
+
+        .worker-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #fbbf24;
+            margin-bottom: 4px;
+        }
+
+        .worker-rating span {
+            color: var(--gray-600);
+            font-size: var(--font-size-sm);
+        }
+
+        .worker-specialty {
+            color: var(--primary-600);
+            font-weight: 500;
+        }
+
+        .worker-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-left: auto;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: var(--spacing-xl);
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--gray-200);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: var(--spacing-lg);
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -25px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid var(--primary-600);
+            z-index: 1;
+        }
+
+        .timeline-item.completed .timeline-dot {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .timeline-item.active .timeline-dot {
+            background: var(--primary-600);
+            border-color: var(--primary-600);
+            box-shadow: 0 0 0 4px var(--primary-100);
+        }
+
+        .timeline-content {
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+        }
+
+        .timeline-content h4 {
+            margin-bottom: 4px;
+        }
+
+        .timeline-content p {
+            color: var(--gray-600);
+            font-size: var(--font-size-sm);
+        }
+
+        .timeline-time {
+            font-size: var(--font-size-xs);
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-md);
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+        }
+
+        .info-item i {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-600);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .info-item-content h4 {
+            font-size: var(--font-size-sm);
+            color: var(--gray-600);
+            margin-bottom: 2px;
+        }
+
+        .info-item-content p {
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        /* Price Breakdown */
+        .price-breakdown {
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-sm);
+            color: var(--gray-600);
+        }
+
+        .price-row.total {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--gray-800);
+            padding-top: var(--spacing-md);
+            margin-top: var(--spacing-md);
+            border-top: 2px solid var(--gray-300);
+        }
+
+        .price-row.discount {
+            color: var(--success);
+        }
+
+        /* Payment Status */
+        .payment-status {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            margin-top: var(--spacing-md);
+        }
+
+        .payment-status i {
+            font-size: 1.5rem;
+            color: var(--success);
+        }
+
+        .payment-status.pending i {
+            color: var(--warning);
+        }
+
+        .payment-status.failed i {
+            color: var(--error);
+        }
+
+        /* Address Card */
+        .address-card {
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+        }
+
+        .address-type {
+            display: inline-block;
+            padding: 0.25rem 1rem;
+            background: var(--primary-100);
+            color: var(--primary-700);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .address-text {
+            color: var(--gray-700);
+            margin-bottom: var(--spacing-xs);
+            line-height: 1.6;
+        }
+
+        .address-phone {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--gray-600);
+            font-size: var(--font-size-sm);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-xl);
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            flex: 1;
+            min-width: 200px;
+            padding: 1rem;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-xs);
+        }
+
+        .action-btn.primary {
+            background: var(--primary-600);
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            background: var(--primary-700);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .action-btn.secondary {
+            background: white;
+            color: var(--primary-600);
+            border: 2px solid var(--primary-600);
+        }
+
+        .action-btn.secondary:hover {
+            background: var(--primary-50);
+            transform: translateY(-2px);
+        }
+
+        .action-btn.danger {
+            background: white;
+            color: var(--error);
+            border: 2px solid var(--error);
+        }
+
+        .action-btn.danger:hover {
+            background: #fee2e2;
+        }
+
+        /* Cancel Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-2xl);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-500);
+        }
+
+        .cancel-reasons {
+            margin: var(--spacing-lg) 0;
+        }
+
+        .cancel-reason {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-xs);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .cancel-reason:hover {
+            background: var(--gray-50);
+            border-color: var(--primary-400);
+        }
+
+        .cancel-reason.selected {
+            background: var(--primary-50);
+            border-color: var(--primary-600);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .worker-profile {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .worker-actions {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <a href="/" class="logo">AP<span>Services</span></a>
+                <div class="nav-links"></div>
+                <button class="mobile-menu-btn"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Booking Details Page -->
+    <section class="booking-details-page">
+        <div class="container">
+            <!-- Breadcrumb -->
+            <div class="breadcrumb">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/customer-dashboard.html">Dashboard</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="active">Booking Details</span>
+            </div>
+
+            <!-- Header -->
+            <div class="booking-header">
+                <h1>Booking Details</h1>
+                <span class="status-badge confirmed" id="bookingStatus">Confirmed</span>
+            </div>
+
+            <!-- Main Grid -->
+            <div class="details-grid">
+                <!-- Left Column -->
+                <div class="left-column">
+                    <!-- Service Details Card -->
+                    <div class="detail-card">
+                        <h3 class="card-title">
+                            <i class="fas fa-tools"></i> Service Details
+                        </h3>
+                        <div class="service-info">
+                            <div class="service-icon">
+                                <i class="fas fa-wrench"></i>
+                            </div>
+                            <div class="service-details">
+                                <h2 id="serviceName">Plumbing Repair</h2>
+                                <div class="service-meta">
+                                    <span><i class="fas fa-clock"></i> 2 hours</span>
+                                    <span><i class="fas fa-calendar"></i> 15 Mar 2024</span>
+                                    <span><i class="fas fa-clock"></i> 10:00 AM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Worker Details Card -->
+                    <div class="detail-card">
+                        <h3 class="card-title">
+                            <i class="fas fa-user"></i> Professional Details
+                        </h3>
+                        <div class="worker-profile">
+                            <div class="worker-avatar" id="workerAvatar">RK</div>
+                            <div class="worker-info">
+                                <h3 id="workerName">Rajesh Kumar</h3>
+                                <div class="worker-rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                    <span>(4.9) 328 reviews</span>
+                                </div>
+                                <div class="worker-specialty" id="workerSpecialty">Plumbing Expert</div>
+                            </div>
+                            <div class="worker-actions">
+                                <button class="icon-btn" onclick="viewWorkerProfile()">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="icon-btn" onclick="chatWithWorker()">
+                                    <i class="fas fa-comment"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Card -->
+                    <div class="detail-card">
+                        <h3 class="card-title">
+                            <i class="fas fa-history"></i> Booking Timeline
+                        </h3>
+                        <div class="timeline">
+                            <div class="timeline-item completed">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <h4>Booking Created</h4>
+                                    <p>Your booking request has been sent</p>
+                                    <div class="timeline-time">15 Mar 2024, 09:30 AM</div>
+                                </div>
+                            </div>
+                            <div class="timeline-item completed">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <h4>Confirmed by Professional</h4>
+                                    <p>Rajesh Kumar accepted your booking</p>
+                                    <div class="timeline-time">15 Mar 2024, 09:45 AM</div>
+                                </div>
+                            </div>
+                            <div class="timeline-item active">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <h4>Service Scheduled</h4>
+                                    <p>Professional will arrive at 10:00 AM</p>
+                                    <div class="timeline-time">15 Mar 2024</div>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <h4>Service Completed</h4>
+                                    <p>Awaiting completion</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="right-column">
+                    <!-- Booking Information Card -->
+                    <div class="detail-card">
+                        <h3 class="card-title">
+                            <i class="fas fa-info-circle"></i> Booking Information
+                        </h3>
+                        
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <i class="fas fa-calendar"></i>
+                                <div class="info-item-content">
+                                    <h4>Booking Date</h4>
+                                    <p id="bookingDate">15 Mar 2024</p>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-clock"></i>
+                                <div class="info-item-content">
+                                    <h4>Booking Time</h4>
+                                    <p id="bookingTime">10:00 AM - 12:00 PM</p>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-hashtag"></i>
+                                <div class="info-item-content">
+                                    <h4>Booking ID</h4>
+                                    <p id="bookingId">#BK24031501</p>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-phone"></i>
+                                <div class="info-item-content">
+                                    <h4>Contact</h4>
+                                    <p id="contactNumber">+91 98765 43210</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Address Card -->
+                    <div class="detail-card">
+                        <h3 class="card-title">
+                            <i class="fas fa-map-marker-alt"></i> Service Address
+                        </h3>
+                        <div class="address-card">
+                            <span class="address-type" id="addressType">Home</span>
+                            <p class="address-text" id="address">
+                                Flat 101, Sunshine Apartments,<br>
+                                MG Road, Andheri East,<br>
+                                Mumbai - 400069
+                            </p>
+                            <p class="address-phone">
+                                <i class="fas fa-phone"></i>
+                                <span id="addressPhone">+91 98765 43210</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Payment Details Card -->
+                    <div class="detail-card">
+                        <h3 class="card-title">
+                            <i class="fas fa-credit-card"></i> Payment Details
+                        </h3>
+                        
+                        <div class="price-breakdown">
+                            <div class="price-row">
+                                <span>Service Charge</span>
+                                <span id="serviceCharge">₹499</span>
+                            </div>
+                            <div class="price-row">
+                                <span>Duration (2 hours)</span>
+                                <span id="duration">-</span>
+                            </div>
+                            <div class="price-row">
+                                <span>Platform Fee</span>
+                                <span id="platformFee">₹49</span>
+                            </div>
+                            <div class="price-row">
+                                <span>GST (18%)</span>
+                                <span id="gst">₹90</span>
+                            </div>
+                            <div class="price-row discount" id="discountRow" style="display: none;">
+                                <span>Coupon Discount</span>
+                                <span id="discount">-₹100</span>
+                            </div>
+                            <div class="price-row total">
+                                <span>Total Amount</span>
+                                <span id="totalAmount">₹638</span>
+                            </div>
+                        </div>
+
+                        <div class="payment-status" id="paymentStatus">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <h4>Payment Successful</h4>
+                                <p>Transaction ID: <span id="transactionId">TXN240315001</span></p>
+                            </div>
+                        </div>
+
+                        <p class="payment-method" style="margin-top: var(--spacing-md); color: var(--gray-600);">
+                            <i class="fas fa-credit-card"></i>
+                            Paid via: <span id="paymentMethod">Credit Card (ending in 4242)</span>
+                        </p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button class="action-btn secondary" onclick="chatWithWorker()">
+                            <i class="fas fa-comment"></i> Chat
+                        </button>
+                        <button class="action-btn primary" onclick="rescheduleBooking()">
+                            <i class="fas fa-calendar-alt"></i> Reschedule
+                        </button>
+                        <button class="action-btn danger" onclick="showCancelModal()">
+                            <i class="fas fa-times"></i> Cancel Booking
+                        </button>
+                    </div>
+
+                    <!-- Need Help -->
+                    <div style="text-align: center; margin-top: var(--spacing-lg);">
+                        <p style="color: var(--gray-600);">
+                            <i class="fas fa-question-circle"></i>
+                            Need help with this booking?
+                            <a href="/help.html" style="color: var(--primary-600);">Contact Support</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cancel Booking Modal -->
+    <div class="modal" id="cancelModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Cancel Booking</h3>
+                <button class="modal-close" onclick="closeModal('cancelModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Please select a reason for cancellation:</p>
+                
+                <div class="cancel-reasons">
+                    <div class="cancel-reason" onclick="selectReason(this)" data-reason="change of plans">
+                        <input type="radio" name="cancelReason" style="display: none;">
+                        <i class="fas fa-calendar-times"></i>
+                        <span>Change of plans</span>
+                    </div>
+                    <div class="cancel-reason" onclick="selectReason(this)" data-reason="found another professional">
+                        <i class="fas fa-user-friends"></i>
+                        <span>Found another professional</span>
+                    </div>
+                    <div class="cancel-reason" onclick="selectReason(this)" data-reason="booking by mistake">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Booked by mistake</span>
+                    </div>
+                    <div class="cancel-reason" onclick="selectReason(this)" data-reason="professional unresponsive">
+                        <i class="fas fa-comment-slash"></i>
+                        <span>Professional not responding</span>
+                    </div>
+                    <div class="cancel-reason" onclick="selectReason(this)" data-reason="other">
+                        <i class="fas fa-ellipsis-h"></i>
+                        <span>Other reason</span>
+                    </div>
+                </div>
+
+                <div class="form-group" id="otherReasonField" style="display: none;">
+                    <textarea class="form-control" rows="3" placeholder="Please specify your reason..."></textarea>
+                </div>
+
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Cancellations made less than 2 hours before the booking may incur a cancellation fee.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline" onclick="closeModal('cancelModal')">Keep Booking</button>
+                <button class="btn-danger" onclick="confirmCancellation()">Confirm Cancellation</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>AP<span style="color: var(--primary-500);">Services</span></h3>
+                    <p>Your trusted platform for booking professional home services.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="/about.html">About Us</a></li>
+                        <li><a href="/contact.html">Contact</a></li>
+                        <li><a href="/privacy.html">Privacy Policy</a></li>
+                        <li><a href="/terms.html">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="/services/plumbing.html">Plumbing</a></li>
+                        <li><a href="/services/electrical.html">Electrical</a></li>
+                        <li><a href="/services/cleaning.html">Cleaning</a></li>
+                        <li><a href="/services/beauty.html">Beauty</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="/help.html">Help Center</a></li>
+                        <li><a href="/faq.html">FAQ</a></li>
+                        <li><a href="/contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 AP Services. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Container -->
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get booking ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookingId = urlParams.get('id');
+            
+            if (bookingId) {
+                loadBookingDetails(bookingId);
+            }
+        });
+
+        function loadBookingDetails(bookingId) {
+            // Mock data - in production, fetch from API
+            const bookings = {
+                'BK24031501': {
+                    status: 'confirmed',
+                    serviceName: 'Plumbing Repair',
+                    serviceIcon: 'wrench',
+                    duration: '2 hours',
+                    date: '15 Mar 2024',
+                    time: '10:00 AM - 12:00 PM',
+                    workerName: 'Rajesh Kumar',
+                    workerAvatar: 'RK',
+                    workerRating: 4.9,
+                    workerReviews: 328,
+                    workerSpecialty: 'Plumbing Expert',
+                    addressType: 'Home',
+                    address: 'Flat 101, Sunshine Apartments, MG Road, Andheri East, Mumbai - 400069',
+                    addressPhone: '+91 98765 43210',
+                    bookingId: '#BK24031501',
+                    contactNumber: '+91 98765 43210',
+                    serviceCharge: 499,
+                    platformFee: 49,
+                    gst: 90,
+                    discount: 100,
+                    total: 638,
+                    transactionId: 'TXN240315001',
+                    paymentMethod: 'Credit Card (ending in 4242)',
+                    paymentStatus: 'success',
+                    timeline: [
+                        { status: 'Booking Created', time: '15 Mar 2024, 09:30 AM', completed: true },
+                        { status: 'Confirmed by Professional', time: '15 Mar 2024, 09:45 AM', completed: true },
+                        { status: 'Service Scheduled', time: '15 Mar 2024', completed: true },
+                        { status: 'Service Completed', time: null, completed: false }
+                    ]
+                }
+            };
+
+            const booking = bookings[bookingId] || bookings['BK24031501'];
+            
+            // Update UI with booking data
+            document.getElementById('bookingStatus').textContent = 
+                booking.status.charAt(0).toUpperCase() + booking.status.slice(1);
+            document.getElementById('bookingStatus').className = `status-badge ${booking.status}`;
+            document.getElementById('serviceName').textContent = booking.serviceName;
+            document.querySelector('.service-meta span:first-child').innerHTML = 
+                `<i class="fas fa-clock"></i> ${booking.duration}`;
+            document.querySelector('.service-meta span:nth-child(2)').innerHTML = 
+                `<i class="fas fa-calendar"></i> ${booking.date}`;
+            document.querySelector('.service-meta span:nth-child(3)').innerHTML = 
+                `<i class="fas fa-clock"></i> ${booking.time.split(' - ')[0]}`;
+            document.getElementById('workerAvatar').textContent = booking.workerAvatar;
+            document.getElementById('workerName').textContent = booking.workerName;
+            document.querySelector('.worker-rating span').textContent = 
+                `(${booking.workerRating}) ${booking.workerReviews} reviews`;
+            document.getElementById('workerSpecialty').textContent = booking.workerSpecialty;
+            document.getElementById('bookingDate').textContent = booking.date;
+            document.getElementById('bookingTime').textContent = booking.time;
+            document.getElementById('bookingId').textContent = booking.bookingId;
+            document.getElementById('contactNumber').textContent = booking.contactNumber;
+            document.getElementById('addressType').textContent = booking.addressType;
+            document.getElementById('address').innerHTML = booking.address.replace(/,/g, ',<br>');
+            document.getElementById('addressPhone').textContent = booking.addressPhone;
+            document.getElementById('serviceCharge').textContent = `₹${booking.serviceCharge}`;
+            document.getElementById('platformFee').textContent = `₹${booking.platformFee}`;
+            document.getElementById('gst').textContent = `₹${booking.gst}`;
+            document.getElementById('totalAmount').textContent = `₹${booking.total}`;
+            document.getElementById('transactionId').textContent = booking.transactionId;
+            document.getElementById('paymentMethod').textContent = booking.paymentMethod;
+            
+            if (booking.discount) {
+                document.getElementById('discountRow').style.display = 'flex';
+                document.getElementById('discount').textContent = `-₹${booking.discount}`;
+            }
+            
+            const paymentStatus = document.getElementById('paymentStatus');
+            if (booking.paymentStatus === 'success') {
+                paymentStatus.className = 'payment-status';
+                paymentStatus.querySelector('i').className = 'fas fa-check-circle';
+                paymentStatus.querySelector('h4').textContent = 'Payment Successful';
+            }
+        }
+
+        function viewWorkerProfile() {
+            window.location.href = '/worker-profile.html?id=1';
+        }
+
+        function chatWithWorker() {
+            window.location.href = '/chat.html?id=1';
+        }
+
+        function rescheduleBooking() {
+            Toast.show('Reschedule feature coming soon!', 'info');
+        }
+
+        function showCancelModal() {
+            document.getElementById('cancelModal').classList.add('show');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        function selectReason(element) {
+            document.querySelectorAll('.cancel-reason').forEach(el => {
+                el.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            
+            const reason = element.dataset.reason;
+            document.getElementById('otherReasonField').style.display = 
+                reason === 'other' ? 'block' : 'none';
+        }
+
+        function confirmCancellation() {
+            const selectedReason = document.querySelector('.cancel-reason.selected');
+            if (!selectedReason) {
+                Toast.show('Please select a cancellation reason', 'warning');
+                return;
+            }
+            
+            Toast.show('Booking cancelled successfully', 'success');
+            closeModal('cancelModal');
+            
+            // Update status
+            document.getElementById('bookingStatus').textContent = 'Cancelled';
+            document.getElementById('bookingStatus').className = 'status-badge cancelled';
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('show');
+            }
+        };
+    </script>
+</body>
+</html>
