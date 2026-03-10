@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services - AP Services</title>
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Services Page Specific Styles -->
+    <style>
+        /* ==================== SERVICES PAGE STYLES ==================== */
+        .services-page {
+            background: var(--gray-50);
+            min-height: calc(100vh - var(--header-height) - var(--footer-height));
+            padding: var(--spacing-xl) 0;
+        }
+
+        /* ==================== PAGE HEADER ==================== */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
+            color: white;
+            padding: var(--spacing-2xl) 0;
+            margin-bottom: var(--spacing-xl);
+            border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+        }
+
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: -50%;
+            left: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+        }
+
+        .page-header .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-sm);
+            color: white;
+        }
+
+        .page-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-md);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb i {
+            font-size: 0.8rem;
+        }
+
+        /* ==================== LAYOUT ==================== */
+        .services-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: var(--spacing-xl);
+            margin-top: var(--spacing-xl);
+        }
+
+        /* ==================== FILTER SIDEBAR ==================== */
+        .filters-sidebar {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+            height: fit-content;
+            position: sticky;
+            top: calc(var(--header-height) + var(--spacing-md));
+            animation: slideInLeft 0.5s ease;
+        }
+
+        .filters-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .filters-header h3 {
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            color: var(--gray-800);
+        }
+
+        .clear-filters {
+            color: var(--primary-600);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 4px 8px;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .clear-filters:hover {
+            background: var(--primary-50);
+        }
+
+        /* Filter Section */
+        .filter-section {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .filter-title {
+            font-weight: 700;
+            color: var(--gray-700);
+            margin-bottom: var(--spacing-sm);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .filter-title i {
+            transition: transform var(--transition-fast);
+        }
+
+        .filter-title.collapsed i {
+            transform: rotate(-90deg);
+        }
+
+        .filter-options {
+            max-height: 300px;
+            overflow-y: auto;
+            transition: max-height var(--transition-base);
+            padding-right: var(--spacing-xs);
+        }
+
+        .filter-options.collapsed {
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            margin-bottom: var(--spacing-xs);
+            padding: var(--spacing-xs);
+            border-radius: var(--radius-md);
+            transition: background var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .filter-option:hover {
+            background: var(--gray-50);
+        }
+
+        .filter-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--primary-600);
+        }
+
+        .filter-option label {
+            flex: 1;
+            cursor: pointer;
+            color: var(--gray-700);
+            font-size: var(--font-size-sm);
+        }
+
+        .filter-option .count {
+            color: var(--gray-500);
+            font-size: var(--font-size-xs);
+            background: var(--gray-100);
+            padding: 2px 6px;
+            border-radius: var(--radius-full);
+        }
+
+        /* Rating Filter */
+        .rating-option {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            margin-bottom: var(--spacing-xs);
+            padding: var(--spacing-xs);
+        }
+
+        .rating-stars {
+            color: #fbbf24;
+            font-size: 0.9rem;
+        }
+
+        /* Price Range */
+        .price-range {
+            padding: var(--spacing-sm) 0;
+        }
+
+        .price-inputs {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-sm);
+        }
+
+        .price-input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+        }
+
+        .price-input:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 2px var(--primary-100);
+        }
+
+        /* Availability Toggle */
+        .availability-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-sm) 0;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: var(--gray-300);
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .toggle-switch.active {
+            background: var(--primary-600);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform var(--transition-fast);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(26px);
+        }
+
+        /* Apply Filters Button (Mobile) */
+        .apply-filters-btn {
+            display: none;
+            width: 100%;
+            margin-top: var(--spacing-lg);
+        }
+
+        /* ==================== MAIN CONTENT ==================== */
+        .services-main {
+            min-height: 600px;
+        }
+
+        /* Search Bar */
+        .search-bar-container {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-sm);
+            box-shadow: var(--shadow-md);
+            margin-bottom: var(--spacing-lg);
+            display: flex;
+            gap: var(--spacing-sm);
+            border: 1px solid var(--gray-200);
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+        }
+
+        .search-input-wrapper input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 2.8rem;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-base);
+            transition: all var(--transition-fast);
+        }
+
+        .search-input-wrapper input:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px var(--primary-100);
+        }
+
+        .location-wrapper {
+            position: relative;
+            min-width: 200px;
+        }
+
+        .location-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+        }
+
+        .location-wrapper select {
+            width: 100%;
+            padding: 1rem 1rem 1rem 2.8rem;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-base);
+            background: white;
+            cursor: pointer;
+            appearance: none;
+        }
+
+        .location-wrapper select:focus {
+            outline: none;
+            border-color: var(--primary-500);
+        }
+
+        /* Results Header */
+        .results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-lg);
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+        }
+
+        .results-count {
+            color: var(--gray-600);
+            font-size: var(--font-size-base);
+        }
+
+        .results-count strong {
+            color: var(--gray-900);
+            font-size: 1.2rem;
+        }
+
+        .sort-options {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .sort-options label {
+            color: var(--gray-600);
+            font-size: var(--font-size-sm);
+        }
+
+        .sort-select {
+            padding: 0.5rem 2rem 0.5rem 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-sm);
+            background: white;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+        }
+
+        /* Services Grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .service-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-base);
+            border: 1px solid var(--gray-200);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .service-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary-200);
+        }
+
+        .service-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--primary-600);
+            color: white;
+            padding: 0.25rem 1rem;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            z-index: 2;
+        }
+
+        .service-image {
+            height: 160px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--transition-base);
+        }
+
+        .service-card:hover .service-image img {
+            transform: scale(1.1);
+        }
+
+        .service-content {
+            padding: var(--spacing-lg);
+        }
+
+        .service-category {
+            color: var(--primary-600);
+            font-weight: 600;
+            font-size: var(--font-size-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .service-content h3 {
+            font-size: 1.2rem;
+            margin-bottom: var(--spacing-xs);
+            color: var(--gray-900);
+        }
+
+        .service-description {
+            color: var(--gray-600);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--spacing-sm);
+            line-height: 1.5;
+        }
+
+        .service-meta {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+            flex-wrap: wrap;
+        }
+
+        .service-rating {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            background: #fef3c7;
+            padding: 4px 8px;
+            border-radius: var(--radius-full);
+            color: #92400e;
+            font-weight: 600;
+            font-size: var(--font-size-xs);
+        }
+
+        .service-rating i {
+            color: #fbbf24;
+        }
+
+        .service-bookings {
+            color: var(--gray-500);
+            font-size: var(--font-size-xs);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .service-price {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .current-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .old-price {
+            color: var(--gray-400);
+            font-size: var(--font-size-sm);
+            text-decoration: line-through;
+        }
+
+        .price-unit {
+            color: var(--gray-600);
+            font-size: var(--font-size-sm);
+        }
+
+        .service-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid var(--gray-200);
+            padding-top: var(--spacing-md);
+        }
+
+        .provider-info {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .provider-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-700);
+            font-weight: 700;
+            font-size: var(--font-size-xs);
+        }
+
+        .provider-name {
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            color: var(--gray-700);
+        }
+
+        .book-btn {
+            padding: 0.5rem 1.5rem;
+            background: var(--primary-600);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .book-btn:hover {
+            background: var(--primary-700);
+            transform: translateY(-2px);
+        }
+
+        /* ==================== EMPTY STATE ==================== */
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-md);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--gray-300);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            color: var(--gray-700);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .empty-state p {
+            color: var(--gray-600);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .empty-state .btn {
+            display: inline-flex;
+        }
+
+        /* ==================== LOADING SKELETON ==================== */
+        .skeleton-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .skeleton-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .skeleton-image {
+            width: 100%;
+            height: 160px;
+            background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-300) 50%, var(--gray-200) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .skeleton-line {
+            height: 16px;
+            background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-300) 50%, var(--gray-200) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: var(--radius-full);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .skeleton-line.short {
+            width: 60%;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ==================== PAGINATION ==================== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-xl);
+        }
+
+        .pagination-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            background: white;
+            color: var(--gray-700);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .pagination-btn:hover {
+            background: var(--primary-50);
+            border-color: var(--primary-400);
+        }
+
+        .pagination-btn.active {
+            background: var(--primary-600);
+            color: white;
+            border-color: var(--primary-600);
+        }
+
+        .pagination-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ==================== MOBILE FILTERS ==================== */
+        .mobile-filter-toggle {
+            display: none;
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 100;
+            background: var(--primary-600);
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow-xl);
+            cursor: pointer;
+            border: none;
+        }
+
+        /* ==================== ANIMATIONS ==================== */
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 1024px) {
+            .services-layout {
+                grid-template-columns: 280px 1fr;
+                gap: var(--spacing-lg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .services-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-sidebar {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                z-index: 1000;
+                border-radius: 0;
+                overflow-y: auto;
+            }
+
+            .filters-sidebar.show {
+                display: block;
+            }
+
+            .mobile-filter-toggle {
+                display: flex;
+            }
+
+            .search-bar-container {
+                flex-direction: column;
+            }
+
+            .location-wrapper {
+                width: 100%;
+            }
+
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .apply-filters-btn {
+                display: block;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .service-footer {
+                flex-direction: column;
+                gap: var(--spacing-sm);
+                align-items: flex-start;
+            }
+
+            .book-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <a href="/" class="logo">AP<span>Services</span></a>
+                
+                <div class="nav-links">
+                    <!-- Dynamically populated by app.js -->
+                </div>
+                
+                <button class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <span>Services</span>
+            </div>
+            <h1>Find Professional Services</h1>
+            <p>Browse through 50+ categories and book trusted professionals in your area</p>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services-page">
+        <div class="container">
+            <div class="services-layout">
+                <!-- Filters Sidebar -->
+                <aside class="filters-sidebar" id="filtersSidebar">
+                    <div class="filters-header">
+                        <h3><i class="fas fa-filter"></i> Filters</h3>
+                        <button class="clear-filters" id="clearFilters">Clear All</button>
+                    </div>
+
+                    <!-- Search Filter -->
+                    <div class="filter-section">
+                        <div class="filter-title">
+                            <span><i class="fas fa-search"></i> Search</span>
+                        </div>
+                        <div class="filter-options">
+                            <input type="text" class="form-control" id="filterSearch" 
+                                   placeholder="Search services..." value="">
+                        </div>
+                    </div>
+
+                    <!-- Categories Filter -->
+                    <div class="filter-section">
+                        <div class="filter-title" onclick="toggleFilter(this)">
+                            <span><i class="fas fa-list"></i> Categories</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="filter-options" id="categoryFilters">
+                            <!-- Dynamically loaded -->
+                        </div>
+                    </div>
+
+                    <!-- Rating Filter -->
+                    <div class="filter-section">
+                        <div class="filter-title" onclick="toggleFilter(this)">
+                            <span><i class="fas fa-star"></i> Rating</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="filter-options">
+                            <div class="rating-option">
+                                <input type="checkbox" id="rating4" value="4">
+                                <label for="rating4" class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                    & Up
+                                </label>
+                            </div>
+                            <div class="rating-option">
+                                <input type="checkbox" id="rating3" value="3">
+                                <label for="rating3" class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                    <i class="far fa-star"></i>
+                                    & Up
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Price Range Filter -->
+                    <div class="filter-section">
+                        <div class="filter-title" onclick="toggleFilter(this)">
+                            <span><i class="fas fa-rupee-sign"></i> Price Range</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="filter-options">
+                            <div class="price-range">
+                                <div class="price-inputs">
+                                    <input type="number" class="price-input" id="minPrice" 
+                                           placeholder="Min" min="0" step="100">
+                                    <span>to</span>
+                                    <input type="number" class="price-input" id="maxPrice" 
+                                           placeholder="Max" min="0" step="100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Availability Filter -->
+                    <div class="filter-section">
+                        <div class="filter-title">
+                            <span><i class="fas fa-clock"></i> Availability</span>
+                        </div>
+                        <div class="availability-toggle">
+                            <span>Available Today</span>
+                            <div class="toggle-switch" id="availableToday"></div>
+                        </div>
+                    </div>
+
+                    <!-- Verified Only -->
+                    <div class="filter-section">
+                        <div class="filter-title">
+                            <span><i class="fas fa-shield-alt"></i> Verification</span>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="verifiedOnly">
+                            <label for="verifiedOnly">Verified professionals only</label>
+                        </div>
+                    </div>
+
+                    <!-- Apply Filters Button (Mobile) -->
+                    <button class="btn-primary apply-filters-btn" id="applyFiltersMobile">
+                        Apply Filters
+                    </button>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="services-main">
+                    <!-- Search Bar -->
+                    <div class="search-bar-container">
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="servicesSearch" 
+                                   placeholder="What service do you need? (e.g., plumbing, painting...)" 
+                                   value="">
+                        </div>
+                        <div class="location-wrapper">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <select id="citySelect">
+                                <option value="">All Cities</option>
+                                <option value="mumbai">Mumbai</option>
+                                <option value="delhi">Delhi-NCR</option>
+                                <option value="bangalore">Bangalore</option>
+                                <option value="pune">Pune</option>
+                                <option value="chennai">Chennai</option>
+                                <option value="kolkata">Kolkata</option>
+                                <option value="hyderabad">Hyderabad</option>
+                                <option value="ahmedabad">Ahmedabad</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Results Header -->
+                    <div class="results-header">
+                        <div class="results-count" id="resultsCount">
+                            <strong id="totalCount">0</strong> services found
+                        </div>
+                        <div class="sort-options">
+                            <label for="sortBy">Sort by:</label>
+                            <select id="sortBy" class="sort-select">
+                                <option value="recommended">Recommended</option>
+                                <option value="price_low">Price: Low to High</option>
+                                <option value="price_high">Price: High to Low</option>
+                                <option value="rating">Highest Rated</option>
+                                <option value="popular">Most Popular</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Services Grid -->
+                    <div id="servicesGrid" class="services-grid">
+                        <!-- Dynamic content will be loaded here -->
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="pagination" id="pagination"></div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mobile Filter Toggle -->
+    <button class="mobile-filter-toggle" id="mobileFilterToggle">
+        <i class="fas fa-sliders-h"></i>
+    </button>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>AP<span style="color: var(--primary-500);">Services</span></h3>
+                    <p>Your trusted platform for booking professional home services.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="/about.html">About Us</a></li>
+                        <li><a href="/contact.html">Contact</a></li>
+                        <li><a href="/privacy.html">Privacy Policy</a></li>
+                        <li><a href="/terms.html">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="/services/plumbing.html">Plumbing</a></li>
+                        <li><a href="/services/electrical.html">Electrical</a></li>
+                        <li><a href="/services/cleaning.html">Cleaning</a></li>
+                        <li><a href="/services/beauty.html">Beauty</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="/help.html">Help Center</a></li>
+                        <li><a href="/faq.html">FAQ</a></li>
+                        <li><a href="/contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 AP Services. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Container -->
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+    
+    <script>
+        // ==================== SERVICES PAGE JAVASCRIPT ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // State Management
+            let currentPage = 1;
+            let totalPages = 1;
+            let isLoading = false;
+            let allServices = [];
+            let filteredServices = [];
+            let activeFilters = {
+                search: '',
+                city: '',
+                categories: [],
+                ratings: [],
+                minPrice: null,
+                maxPrice: null,
+                availableToday: false,
+                verifiedOnly: false,
+                sortBy: 'recommended'
+            };
+
+            // DOM Elements
+            const servicesGrid = document.getElementById('servicesGrid');
+            const resultsCount = document.getElementById('totalCount');
+            const pagination = document.getElementById('pagination');
+            const searchInput = document.getElementById('servicesSearch');
+            const filterSearch = document.getElementById('filterSearch');
+            const citySelect = document.getElementById('citySelect');
+            const sortSelect = document.getElementById('sortBy');
+            const clearFiltersBtn = document.getElementById('clearFilters');
+            const availableTodayToggle = document.getElementById('availableToday');
+            const verifiedCheckbox = document.getElementById('verifiedOnly');
+            const minPrice = document.getElementById('minPrice');
+            const maxPrice = document.getElementById('maxPrice');
+            const mobileFilterToggle = document.getElementById('mobileFilterToggle');
+            const filtersSidebar = document.getElementById('filtersSidebar');
+            const applyFiltersMobile = document.getElementById('applyFiltersMobile');
+
+            // ==================== INITIALIZATION ====================
+            async function init() {
+                showSkeleton();
+                await loadServices();
+                setupEventListeners();
+                checkUrlParams();
+            }
+
+            // Load services from API
+            async function loadServices() {
+                try {
+                    // In production, replace with actual API call
+                    // const response = await API.get('/services');
+                    // allServices = response.data;
+                    
+                    // Mock data for demonstration
+                    allServices = generateMockServices();
+                    applyFilters();
+                } catch (error) {
+                    console.error('Failed to load services:', error);
+                    Toast.show('Failed to load services', 'error');
+                }
+            }
+
+            // Generate mock services (replace with actual API data)
+            function generateMockServices() {
+                const categories = [
+                    'Plumbing', 'Electrical', 'Painting', 'Cleaning', 
+                    'Carpentry', 'Beauty', 'AC Repair', 'Tutoring',
+                    'Home Nurse', 'Security', 'Yoga', 'Photography',
+                    'Web Development', 'App Development', 'CCTV Installation'
+                ];
+                
+                const services = [];
+                
+                for (let i = 1; i <= 50; i++) {
+                    const category = categories[Math.floor(Math.random() * categories.length)];
+                    const rating = (3.5 + Math.random() * 1.5).toFixed(1);
+                    const bookings = Math.floor(Math.random() * 500) + 50;
+                    const price = Math.floor(Math.random() * 800) + 199;
+                    
+                    services.push({
+                        id: i,
+                        name: `${category} Service`,
+                        category: category,
+                        description: `Professional ${category.toLowerCase()} service for your home. Quality work guaranteed.`,
+                        rating: rating,
+                        totalBookings: bookings,
+                        price: price,
+                        oldPrice: Math.floor(price * 1.2),
+                        image: `https://source.unsplash.com/300x200/?${category.toLowerCase()}`,
+                        providerName: `Provider ${i}`,
+                        providerInitials: `P${i}`,
+                        availableToday: Math.random() > 0.3,
+                        verified: Math.random() > 0.2,
+                        city: ['Mumbai', 'Delhi', 'Bangalore', 'Pune'][Math.floor(Math.random() * 4)]
+                    });
+                }
+                
+                return services;
+            }
+
+            // ==================== FILTERING ====================
+            function applyFilters() {
+                let filtered = [...allServices];
+
+                // Search filter
+                if (activeFilters.search) {
+                    const searchLower = activeFilters.search.toLowerCase();
+                    filtered = filtered.filter(service => 
+                        service.name.toLowerCase().includes(searchLower) ||
+                        service.category.toLowerCase().includes(searchLower) ||
+                        service.description.toLowerCase().includes(searchLower)
+                    );
+                }
+
+                // City filter
+                if (activeFilters.city) {
+                    filtered = filtered.filter(service => 
+                        service.city.toLowerCase() === activeFilters.city.toLowerCase()
+                    );
+                }
+
+                // Category filters
+                if (activeFilters.categories.length > 0) {
+                    filtered = filtered.filter(service => 
+                        activeFilters.categories.includes(service.category)
+                    );
+                }
+
+                // Rating filter
+                if (activeFilters.ratings.length > 0) {
+                    filtered = filtered.filter(service => {
+                        return activeFilters.ratings.some(rating => 
+                            service.rating >= parseInt(rating)
+                        );
+                    });
+                }
+
+                // Price range
+                if (activeFilters.minPrice !== null) {
+                    filtered = filtered.filter(service => 
+                        service.price >= activeFilters.minPrice
+                    );
+                }
+                if (activeFilters.maxPrice !== null) {
+                    filtered = filtered.filter(service => 
+                        service.price <= activeFilters.maxPrice
+                    );
+                }
+
+                // Availability
+                if (activeFilters.availableToday) {
+                    filtered = filtered.filter(service => service.availableToday);
+                }
+
+                // Verified only
+                if (activeFilters.verifiedOnly) {
+                    filtered = filtered.filter(service => service.verified);
+                }
+
+                // Sorting
+                switch(activeFilters.sortBy) {
+                    case 'price_low':
+                        filtered.sort((a, b) => a.price - b.price);
+                        break;
+                    case 'price_high':
+                        filtered.sort((a, b) => b.price - a.price);
+                        break;
+                    case 'rating':
+                        filtered.sort((a, b) => b.rating - a.rating);
+                        break;
+                    case 'popular':
+                        filtered.sort((a, b) => b.totalBookings - a.totalBookings);
+                        break;
+                    default:
+                        // Recommended - mix of rating and popularity
+                        filtered.sort((a, b) => 
+                            (b.rating * 0.6 + b.totalBookings * 0.4) - 
+                            (a.rating * 0.6 + a.totalBookings * 0.4)
+                        );
+                }
+
+                filteredServices = filtered;
+                totalPages = Math.ceil(filtered.length / 12);
+                renderServices();
+                updateResultsCount();
+                renderPagination();
+            }
+
+            // ==================== RENDERING ====================
+            function renderServices() {
+                const start = (currentPage - 1) * 12;
+                const end = start + 12;
+                const pageServices = filteredServices.slice(start, end);
+
+                if (pageServices.length === 0) {
+                    renderEmptyState();
+                    return;
+                }
+
+                servicesGrid.innerHTML = pageServices.map(service => `
+                    <div class="service-card" onclick="viewService(${service.id})">
+                        ${service.availableToday ? '<div class="service-badge">Available Today</div>' : ''}
+                        <div class="service-image">
+                            <img src="${service.image}" alt="${service.name}">
+                        </div>
+                        <div class="service-content">
+                            <div class="service-category">${service.category}</div>
+                            <h3>${service.name}</h3>
+                            <p class="service-description">${service.description}</p>
+                            
+                            <div class="service-meta">
+                                <span class="service-rating">
+                                    <i class="fas fa-star"></i> ${service.rating}
+                                </span>
+                                <span class="service-bookings">
+                                    <i class="fas fa-users"></i> ${service.totalBookings}+ bookings
+                                </span>
+                            </div>
+                            
+                            <div class="service-price">
+                                <span class="current-price">₹${service.price}</span>
+                                <span class="old-price">₹${service.oldPrice}</span>
+                                <span class="price-unit">/hour</span>
+                            </div>
+                            
+                            <div class="service-footer">
+                                <div class="provider-info">
+                                    <div class="provider-avatar">${service.providerInitials}</div>
+                                    <span class="provider-name">${service.providerName}</span>
+                                    ${service.verified ? '<i class="fas fa-check-circle" style="color: var(--success);" title="Verified"></i>' : ''}
+                                </div>
+                                <button class="book-btn" onclick="event.stopPropagation(); bookService(${service.id})">
+                                    Book Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            function renderEmptyState() {
+                servicesGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <h3>No services found</h3>
+                        <p>Try adjusting your filters or search criteria</p>
+                        <button class="btn-primary" onclick="clearAllFilters()">
+                            Clear All Filters
+                        </button>
+                    </div>
+                `;
+            }
+
+            function showSkeleton() {
+                servicesGrid.innerHTML = `
+                    <div class="skeleton-grid">
+                        ${Array(6).fill(0).map(() => `
+                            <div class="skeleton-card">
+                                <div class="skeleton-image"></div>
+                                <div class="skeleton-line short"></div>
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line short"></div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            function updateResultsCount() {
+                resultsCount.textContent = filteredServices.length;
+            }
+
+            // ==================== PAGINATION ====================
+            function renderPagination() {
+                if (totalPages <= 1) {
+                    pagination.innerHTML = '';
+                    return;
+                }
+
+                let paginationHTML = '';
+                
+                // Previous button
+                paginationHTML += `
+                    <button class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" 
+                            onclick="changePage(${currentPage - 1})" 
+                            ${currentPage === 1 ? 'disabled' : ''}>
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                `;
+
+                // Page numbers
+                for (let i = 1; i <= totalPages; i++) {
+                    if (
+                        i === 1 || 
+                        i === totalPages || 
+                        (i >= currentPage - 2 && i <= currentPage + 2)
+                    ) {
+                        paginationHTML += `
+                            <button class="pagination-btn ${i === currentPage ? 'active' : ''}" 
+                                    onclick="changePage(${i})">
+                                ${i}
+                            </button>
+                        `;
+                    } else if (i === currentPage - 3 || i === currentPage + 3) {
+                        paginationHTML += `<span class="pagination-btn disabled">...</span>`;
+                    }
+                }
+
+                // Next button
+                paginationHTML += `
+                    <button class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" 
+                            onclick="changePage(${currentPage + 1})"
+                            ${currentPage === totalPages ? 'disabled' : ''}>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                `;
+
+                pagination.innerHTML = paginationHTML;
+            }
+
+            // ==================== CATEGORY FILTERS ====================
+            function renderCategoryFilters() {
+                const categories = [...new Set(allServices.map(s => s.category))];
+                const container = document.getElementById('categoryFilters');
+                
+                container.innerHTML = categories.map(category => {
+                    const count = allServices.filter(s => s.category === category).length;
+                    return `
+                        <div class="filter-option">
+                            <input type="checkbox" class="category-filter" 
+                                   value="${category}" id="cat_${category}">
+                            <label for="cat_${category}">${category}</label>
+                            <span class="count">${count}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                // Add event listeners to category checkboxes
+                document.querySelectorAll('.category-filter').forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        if (this.checked) {
+                            activeFilters.categories.push(this.value);
+                        } else {
+                            activeFilters.categories = activeFilters.categories.filter(c => c !== this.value);
+                        }
+                        currentPage = 1;
+                        applyFilters();
+                        updateUrlParams();
+                    });
+                });
+            }
+
+            // ==================== EVENT LISTENERS ====================
+            function setupEventListeners() {
+                // Search input (debounced)
+                let searchTimeout;
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        activeFilters.search = this.value;
+                        filterSearch.value = this.value;
+                        currentPage = 1;
+                        applyFilters();
+                        updateUrlParams();
+                    }, 500);
+                });
+
+                filterSearch.addEventListener('input', function() {
+                    searchInput.value = this.value;
+                    activeFilters.search = this.value;
+                    currentPage = 1;
+                    applyFilters();
+                    updateUrlParams();
+                });
+
+                // City select
+                citySelect.addEventListener('change', function() {
+                    activeFilters.city = this.value;
+                    currentPage = 1;
+                    applyFilters();
+                    updateUrlParams();
+                });
+
+                // Sort select
+                sortSelect.addEventListener('change', function() {
+                    activeFilters.sortBy = this.value;
+                    applyFilters();
+                    updateUrlParams();
+                });
+
+                // Rating filters
+                document.querySelectorAll('[id^="rating"]').forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        if (this.checked) {
+                            activeFilters.ratings.push(this.value);
+                        } else {
+                            activeFilters.ratings = activeFilters.ratings.filter(r => r !== this.value);
+                        }
+                        currentPage = 1;
+                        applyFilters();
+                        updateUrlParams();
+                    });
+                });
+
+                // Price range
+                minPrice.addEventListener('change', function() {
+                    activeFilters.minPrice = this.value ? parseInt(this.value) : null;
+                    currentPage = 1;
+                    applyFilters();
+                    updateUrlParams();
+                });
+
+                maxPrice.addEventListener('change', function() {
+                    activeFilters.maxPrice = this.value ? parseInt(this.value) : null;
+                    currentPage = 1;
+                    applyFilters();
+                    updateUrlParams();
+                });
+
+                // Availability toggle
+                availableTodayToggle.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    activeFilters.availableToday = this.classList.contains('active');
+                    currentPage = 1;
+                    applyFilters();
+                    updateUrlParams();
+                });
+
+                // Verified only
+                verifiedCheckbox.addEventListener('change', function() {
+                    activeFilters.verifiedOnly = this.checked;
+                    currentPage = 1;
+                    applyFilters();
+                    updateUrlParams();
+                });
+
+                // Clear filters
+                clearFiltersBtn.addEventListener('click', clearAllFilters);
+
+                // Mobile filter toggle
+                mobileFilterToggle.addEventListener('click', function() {
+                    filtersSidebar.classList.add('show');
+                });
+
+                applyFiltersMobile.addEventListener('click', function() {
+                    filtersSidebar.classList.remove('show');
+                });
+
+                // Close filters when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (filtersSidebar.classList.contains('show') && 
+                        !filtersSidebar.contains(e.target) && 
+                        !mobileFilterToggle.contains(e.target)) {
+                        filtersSidebar.classList.remove('show');
+                    }
+                });
+            }
+
+            // ==================== URL PARAMS ====================
+            function checkUrlParams() {
+                const params = new URLSearchParams(window.location.search);
+                
+                // Search query
+                const q = params.get('q');
+                if (q) {
+                    activeFilters.search = q;
+                    searchInput.value = q;
+                    filterSearch.value = q;
+                }
+
+                // City
+                const city = params.get('city');
+                if (city) {
+                    activeFilters.city = city;
+                    citySelect.value = city;
+                }
+
+                // Category
+                const category = params.get('category');
+                if (category) {
+                    activeFilters.categories = [category];
+                }
+
+                applyFilters();
+            }
+
+            function updateUrlParams() {
+                const params = new URLSearchParams();
+                
+                if (activeFilters.search) params.set('q', activeFilters.search);
+                if (activeFilters.city) params.set('city', activeFilters.city);
+                
+                const url = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+                window.history.replaceState({}, '', url);
+            }
+
+            // ==================== UTILITY FUNCTIONS ====================
+            window.changePage = function(page) {
+                if (page < 1 || page > totalPages || page === currentPage) return;
+                currentPage = page;
+                renderServices();
+                renderPagination();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            window.viewService = function(serviceId) {
+                window.location.href = `/service-details.html?id=${serviceId}`;
+            };
+
+            window.bookService = function(serviceId) {
+                if (!Auth.checkAuth()) {
+                    Toast.show('Please login to book a service', 'warning');
+                    window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.href)}`;
+                    return;
+                }
+                window.location.href = `/booking.html?service=${serviceId}`;
+            };
+
+            window.clearAllFilters = function() {
+                activeFilters = {
+                    search: '',
+                    city: '',
+                    categories: [],
+                    ratings: [],
+                    minPrice: null,
+                    maxPrice: null,
+                    availableToday: false,
+                    verifiedOnly: false,
+                    sortBy: 'recommended'
+                };
+
+                // Reset UI elements
+                searchInput.value = '';
+                filterSearch.value = '';
+                citySelect.value = '';
+                sortSelect.value = 'recommended';
+                minPrice.value = '';
+                maxPrice.value = '';
+                availableTodayToggle.classList.remove('active');
+                verifiedCheckbox.checked = false;
+
+                // Uncheck all checkboxes
+                document.querySelectorAll('.category-filter, [id^="rating"]').forEach(cb => {
+                    cb.checked = false;
+                });
+
+                currentPage = 1;
+                applyFilters();
+                updateUrlParams();
+            };
+
+            // Initialize
+            init();
+
+            // Load categories after services
+            setTimeout(() => {
+                if (allServices.length > 0) {
+                    renderCategoryFilters();
+                }
+            }, 500);
+        });
+
+        // Toggle filter sections
+        window.toggleFilter = function(element) {
+            const options = element.nextElementSibling;
+            const icon = element.querySelector('i:last-child');
+            
+            options.classList.toggle('collapsed');
+            element.classList.toggle('collapsed');
+            
+            if (options.classList.contains('collapsed')) {
+                icon.style.transform = 'rotate(-90deg)';
+            } else {
+                icon.style.transform = 'rotate(0)';
+            }
+        };
+    </script>
+</body>
+</html>
