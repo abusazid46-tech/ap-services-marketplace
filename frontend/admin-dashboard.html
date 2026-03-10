@@ -1,0 +1,2199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - AP Services</title>
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Admin Dashboard Specific Styles -->
+    <style>
+        /* ==================== ADMIN DASHBOARD STYLES ==================== */
+        .dashboard-page {
+            background: var(--gray-50);
+            min-height: calc(100vh - var(--header-height) - var(--footer-height));
+            padding: var(--spacing-xl) 0;
+        }
+
+        .dashboard-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+        }
+
+        /* ==================== WELCOME BANNER ==================== */
+        .welcome-banner {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-2xl);
+            color: white;
+            margin-bottom: var(--spacing-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+        }
+
+        .welcome-banner::after {
+            content: '';
+            position: absolute;
+            bottom: -50%;
+            left: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: var(--spacing-lg);
+        }
+
+        .welcome-text h1 {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-xs);
+            color: white;
+        }
+
+        .welcome-text p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .admin-badge {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1.5rem;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .admin-badge i {
+            color: #fbbf24;
+        }
+
+        /* ==================== DASHBOARD LAYOUT ==================== */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: var(--spacing-xl);
+        }
+
+        /* ==================== SIDEBAR ==================== */
+        .dashboard-sidebar {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+            height: fit-content;
+            position: sticky;
+            top: calc(var(--header-height) + var(--spacing-md));
+        }
+
+        .admin-profile {
+            text-align: center;
+            padding-bottom: var(--spacing-lg);
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .admin-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto var(--spacing-md);
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .admin-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 4px;
+        }
+
+        .admin-role {
+            color: var(--primary-600);
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .admin-email {
+            color: var(--gray-600);
+            font-size: var(--font-size-xs);
+            word-break: break-all;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-lg);
+            color: var(--gray-700);
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            background: var(--gray-100);
+            color: var(--primary-600);
+        }
+
+        .nav-item.active {
+            background: var(--primary-50);
+            color: var(--primary-600);
+            font-weight: 600;
+        }
+
+        .nav-item i {
+            width: 24px;
+            font-size: 1.1rem;
+        }
+
+        .nav-item .badge {
+            margin-left: auto;
+            background: var(--primary-600);
+            color: white;
+            font-size: var(--font-size-xs);
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+        }
+
+        .nav-item .badge.warning {
+            background: var(--warning);
+        }
+
+        .nav-item .badge.danger {
+            background: var(--error);
+        }
+
+        .sidebar-footer {
+            margin-top: var(--spacing-xl);
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-lg);
+            color: var(--error);
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .logout-btn:hover {
+            background: #fee2e2;
+        }
+
+        /* ==================== MAIN CONTENT ==================== */
+        .dashboard-main {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-lg);
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .section-header h2 i {
+            color: var(--primary-600);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+        }
+
+        .date-range {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            background: var(--gray-100);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-200);
+        }
+
+        .date-range i {
+            color: var(--gray-500);
+        }
+
+        .date-range input {
+            border: none;
+            background: transparent;
+            padding: 0.25rem;
+            font-size: var(--font-size-sm);
+        }
+
+        .date-range input:focus {
+            outline: none;
+        }
+
+        /* ==================== STATS CARDS ==================== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, white, var(--gray-50));
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            border: 1px solid var(--gray-200);
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-600);
+        }
+
+        .stat-card.revenue::before {
+            background: #10b981;
+        }
+
+        .stat-card.users::before {
+            background: #3b82f6;
+        }
+
+        .stat-card.bookings::before {
+            background: #8b5cf6;
+        }
+
+        .stat-card.workers::before {
+            background: #f59e0b;
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(37, 99, 235, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-600);
+            font-size: 1.5rem;
+        }
+
+        .stat-change {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+        }
+
+        .stat-change.positive {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .stat-change.negative {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--gray-800);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: var(--gray-600);
+            font-size: var(--font-size-sm);
+        }
+
+        /* ==================== CHARTS GRID ==================== */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .chart-card {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .chart-header h3 {
+            font-size: 1.1rem;
+            color: var(--gray-700);
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: var(--font-size-xs);
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* ==================== QUICK ACTIONS ==================== */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .action-card {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            text-align: center;
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-300);
+        }
+
+        .action-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-50);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--spacing-md);
+            color: var(--primary-600);
+            font-size: 1.5rem;
+            transition: all var(--transition-base);
+        }
+
+        .action-card:hover .action-icon {
+            background: var(--primary-600);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .action-card h4 {
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .action-card p {
+            color: var(--gray-600);
+            font-size: var(--font-size-xs);
+        }
+
+        /* ==================== TABLES ==================== */
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-200);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: var(--spacing-md);
+            background: var(--gray-50);
+            color: var(--gray-700);
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        td {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--gray-200);
+            color: var(--gray-700);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: var(--gray-50);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+        }
+
+        .status-badge.active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-badge.suspended {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-badge.verified {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: var(--spacing-xs);
+        }
+
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--gray-300);
+            background: white;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn:hover {
+            background: var(--primary-50);
+            border-color: var(--primary-400);
+            color: var(--primary-600);
+        }
+
+        .icon-btn.delete:hover {
+            background: #fee2e2;
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-700);
+            font-weight: 700;
+        }
+
+        /* ==================== TABS ==================== */
+        .tabs {
+            display: flex;
+            gap: var(--spacing-xs);
+            margin-bottom: var(--spacing-lg);
+            border-bottom: 2px solid var(--gray-200);
+            padding-bottom: var(--spacing-sm);
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-lg);
+            background: none;
+            color: var(--gray-600);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary-600);
+            background: var(--gray-100);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-600);
+            color: white;
+        }
+
+        /* ==================== FILTER BAR ==================== */
+        .filter-bar {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-sm);
+        }
+
+        .filter-select {
+            padding: 0.75rem 2rem 0.75rem 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-sm);
+            background: white;
+            cursor: pointer;
+        }
+
+        /* ==================== PAGINATION ==================== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-xl);
+        }
+
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            background: white;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .page-btn:hover {
+            background: var(--primary-50);
+            border-color: var(--primary-400);
+        }
+
+        .page-btn.active {
+            background: var(--primary-600);
+            color: white;
+            border-color: var(--primary-600);
+        }
+
+        /* ==================== MODAL ==================== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-2xl);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-500);
+        }
+
+        .modal-close:hover {
+            color: var(--gray-700);
+        }
+
+        .modal-body {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: flex-end;
+        }
+
+        /* ==================== ALERT ==================== */
+        .alert {
+            padding: var(--spacing-md);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 1280px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-sidebar {
+                position: static;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .welcome-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+            }
+
+            .modal-footer button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-main {
+                padding: var(--spacing-lg);
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .date-range {
+                width: 100%;
+            }
+
+            .date-range input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <a href="/" class="logo">AP<span>Services</span></a>
+                
+                <div class="nav-links">
+                    <!-- Dynamically populated by app.js -->
+                </div>
+                
+                <button class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Page -->
+    <section class="dashboard-page">
+        <div class="dashboard-container">
+            <!-- Welcome Banner -->
+            <div class="welcome-banner">
+                <div class="welcome-content">
+                    <div class="welcome-text">
+                        <h1>Admin Dashboard</h1>
+                        <p>Manage your platform, users, and analytics</p>
+                    </div>
+                    <div class="admin-badge">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Super Admin Access</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Sidebar -->
+                <aside class="dashboard-sidebar">
+                    <div class="admin-profile">
+                        <div class="admin-avatar">A</div>
+                        <div class="admin-name">Admin User</div>
+                        <div class="admin-role">Super Administrator</div>
+                        <div class="admin-email">admin@apservices.com</div>
+                    </div>
+
+                    <div class="sidebar-nav">
+                        <button class="nav-item active" data-section="overview">
+                            <i class="fas fa-home"></i>
+                            Overview
+                        </button>
+                        <button class="nav-item" data-section="users">
+                            <i class="fas fa-users"></i>
+                            Users
+                            <span class="badge">2,847</span>
+                        </button>
+                        <button class="nav-item" data-section="workers">
+                            <i class="fas fa-hard-hat"></i>
+                            Workers
+                            <span class="badge warning">124 pending</span>
+                        </button>
+                        <button class="nav-item" data-section="bookings">
+                            <i class="fas fa-calendar-check"></i>
+                            Bookings
+                            <span class="badge">1,432</span>
+                        </button>
+                        <button class="nav-item" data-section="services">
+                            <i class="fas fa-tools"></i>
+                            Services
+                        </button>
+                        <button class="nav-item" data-section="payments">
+                            <i class="fas fa-credit-card"></i>
+                            Payments
+                        </button>
+                        <button class="nav-item" data-section="analytics">
+                            <i class="fas fa-chart-line"></i>
+                            Analytics
+                        </button>
+                        <button class="nav-item" data-section="reports">
+                            <i class="fas fa-flag"></i>
+                            Reports
+                        </button>
+                        <button class="nav-item" data-section="settings">
+                            <i class="fas fa-cog"></i>
+                            Settings
+                        </button>
+                    </div>
+
+                    <div class="sidebar-footer">
+                        <button class="logout-btn" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </button>
+                    </div>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="dashboard-main" id="dashboardMain">
+                    <!-- Overview Section -->
+                    <div class="dashboard-section active" id="overview-section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-chart-pie"></i> Platform Overview</h2>
+                            <div class="header-actions">
+                                <div class="date-range">
+                                    <i class="fas fa-calendar"></i>
+                                    <input type="text" id="dateRange" placeholder="Last 30 days">
+                                </div>
+                                <button class="btn-outline" onclick="refreshDashboard()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Stats Cards -->
+                        <div class="stats-grid">
+                            <div class="stat-card revenue">
+                                <div class="stat-header">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-rupee-sign"></i>
+                                    </div>
+                                    <span class="stat-change positive">
+                                        <i class="fas fa-arrow-up"></i> +12.5%
+                                    </span>
+                                </div>
+                                <div class="stat-value">₹12,45,899</div>
+                                <div class="stat-label">Total Revenue (This Month)</div>
+                            </div>
+                            
+                            <div class="stat-card users">
+                                <div class="stat-header">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <span class="stat-change positive">
+                                        <i class="fas fa-arrow-up"></i> +8.2%
+                                    </span>
+                                </div>
+                                <div class="stat-value">2,847</div>
+                                <div class="stat-label">Total Users</div>
+                            </div>
+                            
+                            <div class="stat-card bookings">
+                                <div class="stat-header">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-calendar-check"></i>
+                                    </div>
+                                    <span class="stat-change positive">
+                                        <i class="fas fa-arrow-up"></i> +15.3%
+                                    </span>
+                                </div>
+                                <div class="stat-value">1,432</div>
+                                <div class="stat-label">Bookings This Month</div>
+                            </div>
+                            
+                            <div class="stat-card workers">
+                                <div class="stat-header">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-hard-hat"></i>
+                                    </div>
+                                    <span class="stat-change positive">
+                                        <i class="fas fa-arrow-up"></i> +5.7%
+                                    </span>
+                                </div>
+                                <div class="stat-value">856</div>
+                                <div class="stat-label">Active Workers</div>
+                            </div>
+                        </div>
+
+                        <!-- Charts -->
+                        <div class="charts-grid">
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <h3>Revenue Overview</h3>
+                                    <div class="chart-legend">
+                                        <div class="legend-item">
+                                            <span class="legend-color" style="background: #2563eb;"></span>
+                                            <span>This Year</span>
+                                        </div>
+                                        <div class="legend-item">
+                                            <span class="legend-color" style="background: #9ca3af;"></span>
+                                            <span>Last Year</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="revenueChart"></canvas>
+                                </div>
+                            </div>
+                            
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <h3>Booking Distribution</h3>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="bookingChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <h3 style="margin-bottom: var(--spacing-md);">Quick Actions</h3>
+                        <div class="quick-actions">
+                            <div class="action-card" onclick="switchSection('workers')">
+                                <div class="action-icon">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <h4>Verify Workers</h4>
+                                <p>124 pending verifications</p>
+                            </div>
+                            
+                            <div class="action-card" onclick="showAddServiceModal()">
+                                <div class="action-icon">
+                                    <i class="fas fa-plus-circle"></i>
+                                </div>
+                                <h4>Add Service</h4>
+                                <p>Create new service category</p>
+                            </div>
+                            
+                            <div class="action-card" onclick="showAnnouncementModal()">
+                                <div class="action-icon">
+                                    <i class="fas fa-bullhorn"></i>
+                                </div>
+                                <h4>Announcement</h4>
+                                <p>Send to all users</p>
+                            </div>
+                            
+                            <div class="action-card" onclick="generateReport()">
+                                <div class="action-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <h4>Generate Report</h4>
+                                <p>Monthly analytics report</p>
+                            </div>
+                        </div>
+
+                        <!-- Recent Users -->
+                        <div class="section-header" style="margin-top: var(--spacing-xl);">
+                            <h3>Recent Users</h3>
+                            <button class="btn-outline" onclick="switchSection('users')">View All</button>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Email</th>
+                                        <th>Type</th>
+                                        <th>Joined</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentUsers">
+                                    <!-- Dynamic content will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Users Section -->
+                    <div class="dashboard-section" id="users-section" style="display: none;">
+                        <div class="section-header">
+                            <h2><i class="fas fa-users"></i> User Management</h2>
+                            <div class="header-actions">
+                                <button class="btn-primary" onclick="showAddUserModal()">
+                                    <i class="fas fa-plus"></i> Add User
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Filter Bar -->
+                        <div class="filter-bar">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="userSearch" placeholder="Search users...">
+                            </div>
+                            <select class="filter-select" id="userTypeFilter">
+                                <option value="all">All Types</option>
+                                <option value="customer">Customers</option>
+                                <option value="worker">Workers</option>
+                                <option value="admin">Admins</option>
+                            </select>
+                            <select class="filter-select" id="userStatusFilter">
+                                <option value="all">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="pending">Pending</option>
+                                <option value="suspended">Suspended</option>
+                            </select>
+                        </div>
+
+                        <!-- Users Table -->
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Type</th>
+                                        <th>Joined</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTable">
+                                    <!-- Dynamic content will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="pagination">
+                            <button class="page-btn"><i class="fas fa-chevron-left"></i></button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                            <button class="page-btn">4</button>
+                            <button class="page-btn">5</button>
+                            <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Workers Section -->
+                    <div class="dashboard-section" id="workers-section" style="display: none;">
+                        <div class="section-header">
+                            <h2><i class="fas fa-hard-hat"></i> Worker Verification</h2>
+                            <div class="header-actions">
+                                <span class="badge warning">124 pending</span>
+                            </div>
+                        </div>
+
+                        <!-- Tabs -->
+                        <div class="tabs">
+                            <button class="tab-btn active" data-worker-tab="pending">Pending</button>
+                            <button class="tab-btn" data-worker-tab="verified">Verified</button>
+                            <button class="tab-btn" data-worker-tab="rejected">Rejected</button>
+                            <button class="tab-btn" data-worker-tab="all">All Workers</button>
+                        </div>
+
+                        <!-- Workers Table -->
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Worker</th>
+                                        <th>Category</th>
+                                        <th>Experience</th>
+                                        <th>Documents</th>
+                                        <th>Applied</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="workersTable">
+                                    <!-- Dynamic content will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Bookings Section -->
+                    <div class="dashboard-section" id="bookings-section" style="display: none;">
+                        <div class="section-header">
+                            <h2><i class="fas fa-calendar-check"></i> Booking Management</h2>
+                        </div>
+
+                        <!-- Filter Bar -->
+                        <div class="filter-bar">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Search bookings...">
+                            </div>
+                            <select class="filter-select">
+                                <option value="all">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+
+                        <!-- Bookings Table -->
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Booking ID</th>
+                                        <th>Customer</th>
+                                        <th>Worker</th>
+                                        <th>Service</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bookingsTable">
+                                    <!-- Dynamic content will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Services Section -->
+                    <div class="dashboard-section" id="services-section" style="display: none;">
+                        <div class="section-header">
+                            <h2><i class="fas fa-tools"></i> Service Categories</h2>
+                            <button class="btn-primary" onclick="showAddServiceModal()">
+                                <i class="fas fa-plus"></i> Add Service
+                            </button>
+                        </div>
+
+                        <!-- Services Grid -->
+                        <div class="services-grid" id="servicesGrid">
+                            <!-- Dynamic content will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Payments Section -->
+                    <div class="dashboard-section" id="payments-section" style="display: none;">
+                        <div class="section-header">
+                            <h2><i class="fas fa-credit-card"></i> Payment Transactions</h2>
+                        </div>
+
+                        <!-- Summary Cards -->
+                        <div class="stats-grid" style="margin-bottom: var(--spacing-xl);">
+                            <div class="stat-card">
+                                <h4>Total Collected</h4>
+                                <div class="stat-value">₹18,45,899</div>
+                            </div>
+                            <div class="stat-card">
+                                <h4>Pending Payouts</h4>
+                                <div class="stat-value">₹3,24,567</div>
+                            </div>
+                            <div class="stat-card">
+                                <h4>Platform Fees</h4>
+                                <div class="stat-value">₹2,76,885</div>
+                            </div>
+                            <div class="stat-card">
+                                <h4>Refunds</h4>
+                                <div class="stat-value">₹45,678</div>
+                            </div>
+                        </div>
+
+                        <!-- Transactions Table -->
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Transaction ID</th>
+                                        <th>Booking ID</th>
+                                        <th>Customer</th>
+                                        <th>Worker</th>
+                                        <th>Amount</th>
+                                        <th>Platform Fee</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="paymentsTable">
+                                    <!-- Dynamic content will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Section -->
+                    <div class="dashboard-section" id="analytics-section" style="display: none;">
+                        <div class="section-header">
+                            <h2><i class="fas fa-chart-line"></i> Analytics</h2>
+                        </div>
+
+                        <!-- Analytics Cards -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <h4>Conversion Rate</h4>
+                                <div class="stat-value">24.8%</div>
+                                <div class="stat-trend positive">+2.3% vs last month</div>
+                            </div>
+                            <div class="stat-card">
+                                <h4>Avg. Booking Value</h4>
+                                <div class="stat-value">₹899</div>
+                                <div class="stat-trend positive">+₹45</div>
+                            </div>
+                            <div class="stat-card">
+                                <h4>Customer Retention</h4>
+                                <div class="stat-value">62%</div>
+                                <div class="stat-trend positive">+5%</div>
+                            </div>
+                            <div class="stat-card">
+                                <h4>Churn Rate</h4>
+                                <div class="stat-value">8.3%</div>
+                                <div class="stat-trend negative">-1.2%</div>
+                            </div>
+                        </div>
+
+                        <!-- Analytics Charts -->
+                        <div class="charts-grid">
+                            <div class="chart-card">
+                                <h3>User Growth</h3>
+                                <div class="chart-container">
+                                    <canvas id="userGrowthChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="chart-card">
+                                <h3>Popular Categories</h3>
+                                <div class="chart-container">
+                                    <canvas id="popularCategoriesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reports Section -->
+                    <div class="dashboard-section" id="reports-section" style="display: none;">
+                        <div class="section-header">
+                            <h2><i class="fas fa-flag"></i> Reports</h2>
+                        </div>
+
+                        <div class="reports-list">
+                            <div class="report-card" style="border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-md);">
+                                <div style="display: flex; align-items: center; gap: var(--spacing-md); flex-wrap: wrap;">
+                                    <div style="width: 50px; height: 50px; background: var(--primary-100); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-file-pdf" style="color: var(--primary-600); font-size: 1.5rem;"></i>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <h4>Monthly Financial Report - March 2024</h4>
+                                        <p style="color: var(--gray-600);">Generated on April 1, 2024 • 2.4 MB</p>
+                                    </div>
+                                    <button class="btn-outline">
+                                        <i class="fas fa-download"></i> Download
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="report-card" style="border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-md);">
+                                <div style="display: flex; align-items: center; gap: var(--spacing-md); flex-wrap: wrap;">
+                                    <div style="width: 50px; height: 50px; background: var(--primary-100); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-file-excel" style="color: var(--primary-600); font-size: 1.5rem;"></i>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <h4>User Activity Report - Q1 2024</h4>
+                                        <p style="color: var(--gray-600);">Generated on April 1, 2024 • 1.8 MB</p>
+                                    </div>
+                                    <button class="btn-outline">
+                                        <i class="fas fa-download"></i> Download
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="report-card" style="border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-md);">
+                                <div style="display: flex; align-items: center; gap: var(--spacing-md); flex-wrap: wrap;">
+                                    <div style="width: 50px; height: 50px; background: var(--primary-100); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-file-csv" style="color: var(--primary-600); font-size: 1.5rem;"></i>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <h4>Worker Performance Analytics</h4>
+                                        <p style="color: var(--gray-600);">Generated on March 30, 2024 • 3.1 MB</p>
+                                    </div>
+                                    <button class="btn-outline">
+                                        <i class="fas fa-download"></i> Download
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings Section -->
+                    <div class="dashboard-section" id="settings-section" style="display: none;">
+                        <div class="section-header">
+                            <h2><i class="fas fa-cog"></i> Platform Settings</h2>
+                        </div>
+
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label class="form-label">Platform Name</label>
+                                <input type="text" class="form-control" value="AP Services">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Contact Email</label>
+                                <input type="email" class="form-control" value="support@apservices.com">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Platform Fee (%)</label>
+                                <input type="number" class="form-control" value="15" min="0" max="100">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Minimum Withdrawal Amount (₹)</label>
+                                <input type="number" class="form-control" value="500" min="0">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Worker Verification Required</label>
+                                <select class="form-control">
+                                    <option value="yes">Yes - Document verification mandatory</option>
+                                    <option value="no">No - Optional verification</option>
+                                </select>
+                            </div>
+
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Changes to platform settings may affect all users. Please review carefully.
+                            </div>
+
+                            <button class="save-btn">Save Settings</button>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <!-- Add User Modal -->
+    <div class="modal" id="addUserModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New User</h3>
+                <button class="modal-close" onclick="closeModal('addUserModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-control" placeholder="Enter full name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-control" placeholder="Enter email">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" placeholder="Enter phone number">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">User Type</label>
+                    <select class="form-control">
+                        <option value="customer">Customer</option>
+                        <option value="worker">Worker</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Temporary Password</label>
+                    <input type="text" class="form-control" value="Welcome@123" readonly>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline" onclick="closeModal('addUserModal')">Cancel</button>
+                <button class="btn-primary" onclick="addUser()">Create User</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Service Modal -->
+    <div class="modal" id="addServiceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Service Category</h3>
+                <button class="modal-close" onclick="closeModal('addServiceModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Service Name</label>
+                    <input type="text" class="form-control" placeholder="e.g., Plumbing">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Icon</label>
+                    <select class="form-control">
+                        <option value="wrench">Wrench</option>
+                        <option value="bolt">Bolt</option>
+                        <option value="paint-brush">Paint Brush</option>
+                        <option value="broom">Broom</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" rows="3" placeholder="Service description"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Base Price (₹)</label>
+                        <input type="number" class="form-control" placeholder="399">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Price Type</label>
+                        <select class="form-control">
+                            <option value="hourly">Hourly</option>
+                            <option value="fixed">Fixed</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline" onclick="closeModal('addServiceModal')">Cancel</button>
+                <button class="btn-primary" onclick="addService()">Add Service</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Announcement Modal -->
+    <div class="modal" id="announcementModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Send Announcement</h3>
+                <button class="modal-close" onclick="closeModal('announcementModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Send To</label>
+                    <select class="form-control">
+                        <option value="all">All Users</option>
+                        <option value="customers">Customers Only</option>
+                        <option value="workers">Workers Only</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Title</label>
+                    <input type="text" class="form-control" placeholder="Announcement title">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Message</label>
+                    <textarea class="form-control" rows="5" placeholder="Enter your message"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Send Push Notification</label>
+                    <select class="form-control">
+                        <option value="yes">Yes, send push notification</option>
+                        <option value="no">Email only</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline" onclick="closeModal('announcementModal')">Cancel</button>
+                <button class="btn-primary" onclick="sendAnnouncement()">Send Announcement</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>AP<span style="color: var(--primary-500);">Services</span></h3>
+                    <p>Your trusted platform for booking professional home services.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="/about.html">About Us</a></li>
+                        <li><a href="/contact.html">Contact</a></li>
+                        <li><a href="/privacy.html">Privacy Policy</a></li>
+                        <li><a href="/terms.html">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="/services/plumbing.html">Plumbing</a></li>
+                        <li><a href="/services/electrical.html">Electrical</a></li>
+                        <li><a href="/services/cleaning.html">Cleaning</a></li>
+                        <li><a href="/services/beauty.html">Beauty</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="/help.html">Help Center</a></li>
+                        <li><a href="/faq.html">FAQ</a></li>
+                        <li><a href="/contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 AP Services. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Container -->
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+    
+    <script>
+        // ==================== ADMIN DASHBOARD JAVASCRIPT ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication and admin role
+            if (!Auth.checkAuth()) {
+                Toast.show('Please login to access dashboard', 'warning');
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 1500);
+                return;
+            }
+
+            const user = Auth.getUser();
+            if (user?.role !== 'admin') {
+                Toast.show('Access denied. Admin only.', 'error');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+                return;
+            }
+
+            // Initialize dashboard
+            loadDashboardData();
+            initializeCharts();
+            loadRecentUsers();
+            loadUsersTable();
+            loadWorkersTable();
+            loadBookingsTable();
+            loadServicesGrid();
+            loadPaymentsTable();
+
+            // Setup event listeners
+            setupNavigation();
+            setupTabs();
+            setupFilters();
+        });
+
+        // ==================== DATA LOADING ====================
+        function loadDashboardData() {
+            // In production, fetch from API
+            // Mock data already in HTML
+        }
+
+        function loadRecentUsers() {
+            const users = [
+                { name: 'Amit Sharma', email: 'amit@example.com', type: 'Customer', joined: '2024-03-15', status: 'active', avatar: 'AS' },
+                { name: 'Priya Patel', email: 'priya@example.com', type: 'Worker', joined: '2024-03-14', status: 'pending', avatar: 'PP' },
+                { name: 'Rahul Mehta', email: 'rahul@example.com', type: 'Customer', joined: '2024-03-13', status: 'active', avatar: 'RM' },
+                { name: 'Neha Gupta', email: 'neha@example.com', type: 'Worker', joined: '2024-03-12', status: 'verified', avatar: 'NG' }
+            ];
+
+            const tbody = document.getElementById('recentUsers');
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                            <div class="avatar-circle">${user.avatar}</div>
+                            <span>${user.name}</span>
+                        </div>
+                    </td>
+                    <td>${user.email}</td>
+                    <td>${user.type}</td>
+                    <td>${user.joined}</td>
+                    <td><span class="status-badge ${user.status}">${user.status}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="icon-btn" onclick="viewUser('${user.email}')"><i class="fas fa-eye"></i></button>
+                            <button class="icon-btn" onclick="editUser('${user.email}')"><i class="fas fa-edit"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadUsersTable() {
+            const users = [
+                { name: 'Amit Sharma', email: 'amit@example.com', phone: '9876543210', type: 'Customer', joined: '2024-03-15', status: 'active', avatar: 'AS' },
+                { name: 'Priya Patel', email: 'priya@example.com', phone: '9876543211', type: 'Worker', joined: '2024-03-14', status: 'pending', avatar: 'PP' },
+                { name: 'Rahul Mehta', email: 'rahul@example.com', phone: '9876543212', type: 'Customer', joined: '2024-03-13', status: 'active', avatar: 'RM' },
+                { name: 'Neha Gupta', email: 'neha@example.com', phone: '9876543213', type: 'Worker', joined: '2024-03-12', status: 'verified', avatar: 'NG' },
+                { name: 'Vikram Singh', email: 'vikram@example.com', phone: '9876543214', type: 'Admin', joined: '2024-03-11', status: 'active', avatar: 'VS' }
+            ];
+
+            const tbody = document.getElementById('usersTable');
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                            <div class="avatar-circle">${user.avatar}</div>
+                            <span>${user.name}</span>
+                        </div>
+                    </td>
+                    <td>${user.email}</td>
+                    <td>${user.phone}</td>
+                    <td>${user.type}</td>
+                    <td>${user.joined}</td>
+                    <td><span class="status-badge ${user.status}">${user.status}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="icon-btn" onclick="viewUser('${user.email}')"><i class="fas fa-eye"></i></button>
+                            <button class="icon-btn" onclick="editUser('${user.email}')"><i class="fas fa-edit"></i></button>
+                            <button class="icon-btn delete" onclick="suspendUser('${user.email}')"><i class="fas fa-ban"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadWorkersTable() {
+            const workers = [
+                { name: 'Rajesh Kumar', category: 'Plumbing', experience: '12 years', documents: 'Submitted', applied: '2024-03-15', status: 'pending', avatar: 'RK' },
+                { name: 'Suresh Patel', category: 'Electrical', experience: '8 years', documents: 'Submitted', applied: '2024-03-14', status: 'pending', avatar: 'SP' },
+                { name: 'Priya Sharma', category: 'Beauty', experience: '6 years', documents: 'Verified', applied: '2024-03-13', status: 'verified', avatar: 'PS' },
+                { name: 'Amit Singh', category: 'AC Repair', experience: '10 years', documents: 'Verified', applied: '2024-03-12', status: 'verified', avatar: 'AS' },
+                { name: 'Neha Gupta', category: 'Tutor', experience: '5 years', documents: 'Rejected', applied: '2024-03-11', status: 'rejected', avatar: 'NG' }
+            ];
+
+            const tbody = document.getElementById('workersTable');
+            tbody.innerHTML = workers.map(worker => `
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                            <div class="avatar-circle">${worker.avatar}</div>
+                            <span>${worker.name}</span>
+                        </div>
+                    </td>
+                    <td>${worker.category}</td>
+                    <td>${worker.experience}</td>
+                    <td><span class="status-badge">${worker.documents}</span></td>
+                    <td>${worker.applied}</td>
+                    <td><span class="status-badge ${worker.status}">${worker.status}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="icon-btn" onclick="viewWorker('${worker.name}')"><i class="fas fa-eye"></i></button>
+                            ${worker.status === 'pending' ? `
+                                <button class="icon-btn" style="color: var(--success);" onclick="verifyWorker('${worker.name}')"><i class="fas fa-check"></i></button>
+                                <button class="icon-btn delete" onclick="rejectWorker('${worker.name}')"><i class="fas fa-times"></i></button>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadBookingsTable() {
+            const bookings = [
+                { id: 'BK001', customer: 'Amit Sharma', worker: 'Rajesh Kumar', service: 'Plumbing', date: '2024-03-15', amount: '₹499', status: 'pending' },
+                { id: 'BK002', customer: 'Priya Patel', worker: 'Suresh Patel', service: 'Electrical', date: '2024-03-14', amount: '₹899', status: 'confirmed' },
+                { id: 'BK003', customer: 'Rahul Mehta', worker: 'Priya Sharma', service: 'Beauty', date: '2024-03-13', amount: '₹1,299', status: 'completed' },
+                { id: 'BK004', customer: 'Neha Gupta', worker: 'Amit Singh', service: 'AC Repair', date: '2024-03-12', amount: '₹599', status: 'cancelled' }
+            ];
+
+            const tbody = document.getElementById('bookingsTable');
+            tbody.innerHTML = bookings.map(booking => `
+                <tr>
+                    <td>${booking.id}</td>
+                    <td>${booking.customer}</td>
+                    <td>${booking.worker}</td>
+                    <td>${booking.service}</td>
+                    <td>${booking.date}</td>
+                    <td>${booking.amount}</td>
+                    <td><span class="status-badge ${booking.status}">${booking.status}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="icon-btn" onclick="viewBooking('${booking.id}')"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadServicesGrid() {
+            const services = [
+                { name: 'Plumbing', icon: 'wrench', categories: 8, workers: 145, status: 'active' },
+                { name: 'Electrical', icon: 'bolt', categories: 6, workers: 98, status: 'active' },
+                { name: 'Beauty', icon: 'spa', categories: 12, workers: 67, status: 'active' },
+                { name: 'Cleaning', icon: 'broom', categories: 5, workers: 89, status: 'active' },
+                { name: 'Painting', icon: 'paint-brush', categories: 4, workers: 56, status: 'inactive' },
+                { name: 'Carpentry', icon: 'hammer', categories: 7, workers: 43, status: 'active' }
+            ];
+
+            const container = document.getElementById('servicesGrid');
+            container.innerHTML = services.map(service => `
+                <div class="service-card" style="border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-md);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); flex-wrap: wrap;">
+                        <div style="width: 60px; height: 60px; background: var(--primary-100); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-${service.icon}" style="color: var(--primary-600); font-size: 1.5rem;"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <h4 style="margin-bottom: 4px;">${service.name}</h4>
+                            <p style="color: var(--gray-600);">${service.categories} subcategories • ${service.workers} workers</p>
+                        </div>
+                        <div>
+                            <span class="status-badge ${service.status}">${service.status}</span>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="icon-btn" onclick="editService('${service.name}')"><i class="fas fa-edit"></i></button>
+                            <button class="icon-btn" onclick="toggleServiceStatus('${service.name}')"><i class="fas fa-toggle-on"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadPaymentsTable() {
+            const payments = [
+                { id: 'TXN001', booking: 'BK001', customer: 'Amit Sharma', worker: 'Rajesh Kumar', amount: '₹499', fee: '₹75', status: 'completed', date: '2024-03-15' },
+                { id: 'TXN002', booking: 'BK002', customer: 'Priya Patel', worker: 'Suresh Patel', amount: '₹899', fee: '₹135', status: 'completed', date: '2024-03-14' },
+                { id: 'TXN003', booking: 'BK003', customer: 'Rahul Mehta', worker: 'Priya Sharma', amount: '₹1,299', fee: '₹195', status: 'pending', date: '2024-03-13' },
+                { id: 'TXN004', booking: 'BK004', customer: 'Neha Gupta', worker: 'Amit Singh', amount: '₹599', fee: '₹90', status: 'refunded', date: '2024-03-12' }
+            ];
+
+            const tbody = document.getElementById('paymentsTable');
+            tbody.innerHTML = payments.map(payment => `
+                <tr>
+                    <td>${payment.id}</td>
+                    <td>${payment.booking}</td>
+                    <td>${payment.customer}</td>
+                    <td>${payment.worker}</td>
+                    <td>${payment.amount}</td>
+                    <td>${payment.fee}</td>
+                    <td><span class="status-badge ${payment.status}">${payment.status}</span></td>
+                    <td>${payment.date}</td>
+                </tr>
+            `).join('');
+        }
+
+        // ==================== CHARTS ====================
+        function initializeCharts() {
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [
+                        {
+                            label: 'This Year',
+                            data: [65000, 72000, 85000, 78000, 92000, 88000, 95000, 102000, 98000, 110000, 115000, 124589],
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Last Year',
+                            data: [55000, 58000, 62000, 60000, 68000, 65000, 72000, 75000, 78000, 82000, 85000, 92000],
+                            borderColor: '#9ca3af',
+                            backgroundColor: 'transparent',
+                            tension: 0.4,
+                            borderDash: [5, 5]
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // Booking Chart
+            const bookingCtx = document.getElementById('bookingChart').getContext('2d');
+            new Chart(bookingCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Plumbing', 'Electrical', 'Cleaning', 'Beauty', 'Others'],
+                    datasets: [{
+                        data: [35, 25, 20, 15, 5],
+                        backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // User Growth Chart
+            const userGrowthCtx = document.getElementById('userGrowthChart')?.getContext('2d');
+            if (userGrowthCtx) {
+                new Chart(userGrowthCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                        datasets: [{
+                            label: 'New Users',
+                            data: [245, 312, 289, 356],
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // Popular Categories Chart
+            const categoriesCtx = document.getElementById('popularCategoriesChart')?.getContext('2d');
+            if (categoriesCtx) {
+                new Chart(categoriesCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Plumbing', 'Electrical', 'Cleaning', 'Beauty', 'AC Repair'],
+                        datasets: [{
+                            data: [450, 380, 320, 290, 210],
+                            backgroundColor: '#2563eb'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ==================== NAVIGATION ====================
+        function setupNavigation() {
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const section = this.dataset.section;
+                    switchSection(section);
+                });
+            });
+        }
+
+        function switchSection(section) {
+            document.querySelectorAll('.dashboard-section').forEach(s => s.style.display = 'none');
+            document.getElementById(`${section}-section`).style.display = 'block';
+            window.location.hash = section;
+        }
+
+        // ==================== TABS ====================
+        function setupTabs() {
+            const tabs = document.querySelectorAll('[data-worker-tab]');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const tabName = this.dataset.workerTab;
+                    filterWorkers(tabName);
+                });
+            });
+        }
+
+        function filterWorkers(tab) {
+            Toast.show(`Filtering ${tab} workers`, 'info');
+        }
+
+        // ==================== FILTERS ====================
+        function setupFilters() {
+            const userSearch = document.getElementById('userSearch');
+            if (userSearch) {
+                userSearch.addEventListener('input', function() {
+                    Toast.show('Searching users...', 'info');
+                });
+            }
+
+            const userTypeFilter = document.getElementById('userTypeFilter');
+            if (userTypeFilter) {
+                userTypeFilter.addEventListener('change', function() {
+                    Toast.show(`Filtering by ${this.value}`, 'info');
+                });
+            }
+
+            const userStatusFilter = document.getElementById('userStatusFilter');
+            if (userStatusFilter) {
+                userStatusFilter.addEventListener('change', function() {
+                    Toast.show(`Filtering by ${this.value} status`, 'info');
+                });
+            }
+        }
+
+        // ==================== ACTION FUNCTIONS ====================
+        window.viewUser = function(email) {
+            Toast.show(`Viewing user: ${email}`, 'info');
+        };
+
+        window.editUser = function(email) {
+            Toast.show(`Editing user: ${email}`, 'info');
+        };
+
+        window.suspendUser = function(email) {
+            if (confirm(`Are you sure you want to suspend ${email}?`)) {
+                Toast.show(`User ${email} suspended`, 'warning');
+            }
+        };
+
+        window.viewWorker = function(name) {
+            Toast.show(`Viewing worker: ${name}`, 'info');
+        };
+
+        window.verifyWorker = function(name) {
+            Toast.show(`Worker ${name} verified successfully!`, 'success');
+            loadWorkersTable();
+        };
+
+        window.rejectWorker = function(name) {
+            if (confirm(`Reject worker ${name}?`)) {
+                Toast.show(`Worker ${name} rejected`, 'info');
+                loadWorkersTable();
+            }
+        };
+
+        window.viewBooking = function(id) {
+            window.location.href = `/booking-details.html?id=${id}`;
+        };
+
+        window.editService = function(name) {
+            Toast.show(`Editing service: ${name}`, 'info');
+        };
+
+        window.toggleServiceStatus = function(name) {
+            Toast.show(`Toggling status for: ${name}`, 'info');
+        };
+
+        window.showAddUserModal = function() {
+            document.getElementById('addUserModal').classList.add('show');
+        };
+
+        window.showAddServiceModal = function() {
+            document.getElementById('addServiceModal').classList.add('show');
+        };
+
+        window.showAnnouncementModal = function() {
+            document.getElementById('announcementModal').classList.add('show');
+        };
+
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        };
+
+        window.addUser = function() {
+            Toast.show('User created successfully!', 'success');
+            closeModal('addUserModal');
+            loadUsersTable();
+        };
+
+        window.addService = function() {
+            Toast.show('Service added successfully!', 'success');
+            closeModal('addServiceModal');
+            loadServicesGrid();
+        };
+
+        window.sendAnnouncement = function() {
+            Toast.show('Announcement sent to all users!', 'success');
+            closeModal('announcementModal');
+        };
+
+        window.generateReport = function() {
+            Toast.show('Generating report...', 'info');
+            setTimeout(() => {
+                Toast.show('Report ready for download!', 'success');
+            }, 2000);
+        };
+
+        window.refreshDashboard = function() {
+            Toast.show('Refreshing dashboard...', 'info');
+            loadDashboardData();
+            loadRecentUsers();
+        };
+
+        window.logout = function() {
+            Auth.logout();
+        };
+
+        // Date range picker
+        const dateRange = document.getElementById('dateRange');
+        if (dateRange) {
+            dateRange.value = 'Mar 01, 2024 - Mar 31, 2024';
+        }
+
+        // Check URL hash for initial section
+        if (window.location.hash) {
+            const section = window.location.hash.substring(1);
+            switchSection(section);
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                if (item.dataset.section === section) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
