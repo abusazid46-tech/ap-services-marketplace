@@ -979,9 +979,91 @@
                 gap: var(--spacing-md);
             }
         }
+
+        /* ==================== DEMO NOTICE ==================== */
+        .demo-notice {
+            background: #fbbf24;
+            color: #000;
+            text-align: center;
+            padding: 8px;
+            position: sticky;
+            top: 0;
+            z-index: 9999;
+            font-size: 0.9rem;
+        }
+        
+        .demo-notice i {
+            margin: 0 4px;
+        }
+        
+        .demo-notice button {
+            background: none;
+            border: none;
+            margin-left: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* ==================== DROPDOWN MENU ==================== */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            min-width: 200px;
+            box-shadow: var(--shadow-lg);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xs);
+            z-index: 1000;
+            border: 1px solid var(--gray-200);
+        }
+
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: var(--spacing-sm) var(--spacing-md);
+            color: var(--gray-700);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .dropdown-menu a:hover {
+            background: var(--gray-100);
+            color: var(--primary-600);
+        }
+
+        .dropdown-menu i {
+            width: 20px;
+            margin-right: 8px;
+            color: var(--primary-600);
+        }
     </style>
 </head>
 <body>
+    <!-- Demo Notice -->
+    <div class="demo-notice" id="demoNotice">
+        <i class="fas fa-flask"></i> 
+        <strong>Demo Mode:</strong> This is a UI prototype. All pages are fully functional for demonstration.
+        <button onclick="this.parentElement.style.display='none'">✕</button>
+    </div>
+
     <!-- Navbar -->
     <nav class="navbar">
         <div class="container">
@@ -994,7 +1076,30 @@
                 </div>
                 
                 <div class="nav-links">
-                    <!-- Dynamically populated by app.js -->
+                    <a href="/services.html">Services</a>
+                    <a href="/worker-dashboard.html">Become a Pro</a>
+                    
+                    <!-- Demo Pages Dropdown -->
+                    <div class="dropdown">
+                        <a href="#" class="dropdown-toggle">Demo Pages <i class="fas fa-chevron-down"></i></a>
+                        <div class="dropdown-menu">
+                            <a href="/booking-details.html?id=BK001">
+                                <i class="fas fa-calendar-alt"></i> Booking Details
+                            </a>
+                            <a href="/payment.html">
+                                <i class="fas fa-credit-card"></i> Payment Demo
+                            </a>
+                            <a href="/chat.html?id=1">
+                                <i class="fas fa-comment"></i> Live Chat
+                            </a>
+                            <a href="/help.html">
+                                <i class="fas fa-question-circle"></i> Help Center
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <a href="/login.html" class="btn-outline">Login</a>
+                    <a href="/register.html" class="btn-primary">Sign Up</a>
                 </div>
                 
                 <button class="mobile-menu-btn">
@@ -1072,6 +1177,12 @@
                         <a href="/services.html?q=beauty" class="popular-tag">Beauty</a>
                         <a href="/services.html?q=painting" class="popular-tag">Painting</a>
                         <a href="/services.html?q=ac-repair" class="popular-tag">AC Repair</a>
+                        <a href="/help.html" class="popular-tag">
+                            <i class="fas fa-question-circle"></i> Help
+                        </a>
+                        <a href="/payment.html" class="popular-tag">
+                            <i class="fas fa-credit-card"></i> Payment
+                        </a>
                         <button class="popular-tag" id="detectLocation">
                             <i class="fas fa-location-dot"></i> Detect Location
                         </button>
@@ -1566,165 +1677,291 @@
     </section>
 
     <!-- Footer -->
-<footer class="footer">
-    <div class="container">
-        <div class="footer-grid">
-            <div class="footer-col">
-                <h3>AP<span style="color: var(--primary-500);">Services</span></h3>
-                <p>Your trusted platform for booking professional home services. We connect you with verified experts for all your needs.</p>
-                <div class="social-links">
-                    <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                    <a href="#"><i class="fab fa-youtube"></i></a>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>AP<span style="color: var(--primary-500);">Services</span></h3>
+                    <p>Your trusted platform for booking professional home services. We connect you with verified experts for all your needs.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="/about.html">About Us</a></li>
+                        <li><a href="/careers.html">Careers</a></li>
+                        <li><a href="/blog.html">Blog</a></li>
+                        <li><a href="/press.html">Press</a></li>
+                        <li><a href="/contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="/services/plumbing.html">Plumbing</a></li>
+                        <li><a href="/services/electrical.html">Electrical</a></li>
+                        <li><a href="/services/cleaning.html">Cleaning</a></li>
+                        <li><a href="/services/painting.html">Painting</a></li>
+                        <li><a href="/services/beauty.html">Beauty & Salon</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="/help.html">Help Center</a></li>
+                        <li><a href="/safety.html">Safety</a></li>
+                        <li><a href="/privacy.html">Privacy Policy</a></li>
+                        <li><a href="/terms.html">Terms of Service</a></li>
+                        <li><a href="/faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Quick Demo</h4>
+                    <ul>
+                        <li><a href="/booking-details.html?id=BK001">
+                            <i class="fas fa-calendar-alt"></i> Booking Details
+                        </a></li>
+                        <li><a href="/payment.html">
+                            <i class="fas fa-credit-card"></i> Payment Demo
+                        </a></li>
+                        <li><a href="/chat.html?id=1">
+                            <i class="fas fa-comment"></i> Live Chat
+                        </a></li>
+                        <li><a href="/help.html">
+                            <i class="fas fa-question-circle"></i> Help Center
+                        </a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><i class="fas fa-phone"></i> +91 1800-123-4567</li>
+                        <li><i class="fas fa-envelope"></i> support@apservices.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Mumbai, India</li>
+                    </ul>
                 </div>
             </div>
             
-            <div class="footer-col">
-                <h4>Quick Links</h4>
-                <ul>
-                    <li><a href="/about.html">About Us</a></li>
-                    <li><a href="/careers.html">Careers</a></li>
-                    <li><a href="/blog.html">Blog</a></li>
-                    <li><a href="/press.html">Press</a></li>
-                    <li><a href="/contact.html">Contact Us</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-col">
-                <h4>Services</h4>
-                <ul>
-                    <li><a href="/services/plumbing.html">Plumbing</a></li>
-                    <li><a href="/services/electrical.html">Electrical</a></li>
-                    <li><a href="/services/cleaning.html">Cleaning</a></li>
-                    <li><a href="/services/painting.html">Painting</a></li>
-                    <li><a href="/services/beauty.html">Beauty & Salon</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-col">
-                <h4>Support</h4>
-                <ul>
-                    <li><a href="/help.html">Help Center</a></li>
-                    <li><a href="/safety.html">Safety</a></li>
-                    <li><a href="/privacy.html">Privacy Policy</a></li>
-                    <li><a href="/terms.html">Terms of Service</a></li>
-                    <li><a href="/faq.html">FAQ</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-col">
-                <h4>Quick Demo</h4>
-                <ul>
-                    <li><a href="/booking-details.html?id=BK001">
-                        <i class="fas fa-calendar-alt"></i> Booking Details
-                    </a></li>
-                    <li><a href="/payment.html">
-                        <i class="fas fa-credit-card"></i> Payment Demo
-                    </a></li>
-                    <li><a href="/chat.html?id=1">
-                        <i class="fas fa-comment"></i> Live Chat
-                    </a></li>
-                    <li><a href="/help.html">
-                        <i class="fas fa-question-circle"></i> Help Center
-                    </a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-col">
-                <h4>Contact</h4>
-                <ul>
-                    <li><i class="fas fa-phone"></i> +91 1800-123-4567</li>
-                    <li><i class="fas fa-envelope"></i> support@apservices.com</li>
-                    <li><i class="fas fa-map-marker-alt"></i> Mumbai, India</li>
-                </ul>
+            <div class="footer-bottom">
+                <p>&copy; 2024 AP Services. All rights reserved. Made with ❤️ in India | 
+                    <a href="/booking-details.html?id=BK001" style="color: var(--gray-400);">Booking</a> | 
+                    <a href="/payment.html" style="color: var(--gray-400);">Payment</a> | 
+                    <a href="/chat.html?id=1" style="color: var(--gray-400);">Chat</a> | 
+                    <a href="/help.html" style="color: var(--gray-400);">Help</a>
+                </p>
             </div>
         </div>
-        
-        <div class="footer-bottom">
-            <p>&copy; 2024 AP Services. All rights reserved. Made with ❤️ in India | 
-                <a href="/booking-details.html?id=BK001" style="color: var(--gray-400);">Booking</a> | 
-                <a href="/payment.html" style="color: var(--gray-400);">Payment</a> | 
-                <a href="/chat.html?id=1" style="color: var(--gray-400);">Chat</a> | 
-                <a href="/help.html" style="color: var(--gray-400);">Help</a>
-            </p>
+    </footer>
+
+    <!-- Floating Action Button for Quick Demo Access -->
+    <div class="fab-container">
+        <button class="fab-main" onclick="toggleFabMenu()">
+            <i class="fas fa-plus"></i>
+        </button>
+        <div class="fab-menu" id="fabMenu">
+            <a href="/booking-details.html?id=BK001" class="fab-item" title="Booking Details">
+                <i class="fas fa-calendar-alt"></i>
+            </a>
+            <a href="/payment.html" class="fab-item" title="Payment Demo">
+                <i class="fas fa-credit-card"></i>
+            </a>
+            <a href="/chat.html?id=1" class="fab-item" title="Live Chat">
+                <i class="fas fa-comment"></i>
+            </a>
+            <a href="/help.html" class="fab-item" title="Help Center">
+                <i class="fas fa-question-circle"></i>
+            </a>
         </div>
     </div>
-</footer>
 
-<!-- Back to Top Button -->
-<button id="backToTop" class="btn-primary" style="position: fixed; bottom: 2rem; right: 2rem; display: none; border-radius: 50%; width: 50px; height: 50px; padding: 0; z-index: 999;">
-    <i class="fas fa-arrow-up"></i>
-</button>
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="btn-primary" style="position: fixed; bottom: 2rem; right: 2rem; display: none; border-radius: 50%; width: 50px; height: 50px; padding: 0; z-index: 999;">
+        <i class="fas fa-arrow-up"></i>
+    </button>
 
-<!-- Toast Container -->
-<div id="toast" class="toast"></div>
+    <!-- Toast Container -->
+    <div id="toast" class="toast"></div>
 
-<!-- Scripts -->
-<script src="app.js"></script>
+    <!-- Scripts -->
+    <script src="app.js"></script>
 
-<script>
-    // Homepage specific JavaScript
-    document.addEventListener('DOMContentLoaded', function() {
-        // Search functionality
-        const searchBtn = document.getElementById('searchBtn');
-        const heroSearch = document.getElementById('heroSearch');
-        const citySelect = document.getElementById('citySelect');
-        
-        if (searchBtn) {
-            searchBtn.addEventListener('click', function() {
-                const query = heroSearch.value.trim();
-                const city = citySelect.value;
-                
-                if (!city) {
-                    Toast.show('Please select a city', 'warning');
-                    return;
+    <script>
+        // Homepage specific JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Search functionality
+            const searchBtn = document.getElementById('searchBtn');
+            const heroSearch = document.getElementById('heroSearch');
+            const citySelect = document.getElementById('citySelect');
+            
+            if (searchBtn) {
+                searchBtn.addEventListener('click', function() {
+                    const query = heroSearch.value.trim();
+                    const city = citySelect.value;
+                    
+                    if (!city) {
+                        Toast.show('Please select a city', 'warning');
+                        return;
+                    }
+                    
+                    let url = `/services.html?city=${city}`;
+                    if (query) {
+                        url += `&q=${encodeURIComponent(query)}`;
+                    }
+                    
+                    window.location.href = url;
+                });
+            }
+            
+            // Enter key in search
+            if (heroSearch) {
+                heroSearch.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        searchBtn.click();
+                    }
+                });
+            }
+            
+            // Location detection
+            const detectLocation = document.getElementById('detectLocation');
+            if (detectLocation) {
+                detectLocation.addEventListener('click', function() {
+                    Toast.show('Location detection simulated: Mumbai', 'success');
+                    citySelect.value = 'mumbai';
+                });
+            }
+            
+            // Back to top button
+            const backToTop = document.getElementById('backToTop');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 300) {
+                    backToTop.style.display = 'block';
+                } else {
+                    backToTop.style.display = 'none';
                 }
-                
-                let url = `/services.html?city=${city}`;
-                if (query) {
-                    url += `&q=${encodeURIComponent(query)}`;
-                }
-                
-                window.location.href = url;
             });
-        }
-        
-        // Enter key in search
-        if (heroSearch) {
-            heroSearch.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    searchBtn.click();
-                }
+            
+            backToTop.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
             });
-        }
-        
-        // Back to top button
-        const backToTop = document.getElementById('backToTop');
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 300) {
-                backToTop.style.display = 'block';
-            } else {
-                backToTop.style.display = 'none';
+            
+            // Add smooth scrolling to footer links
+            document.querySelectorAll('.footer a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    console.log('Navigating to:', this.href);
+                });
+            });
+
+            // Global search functionality
+            const globalSearch = document.getElementById('globalSearch');
+            if (globalSearch) {
+                globalSearch.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && this.value.trim()) {
+                        window.location.href = `/services.html?q=${encodeURIComponent(this.value.trim())}`;
+                    }
+                });
             }
         });
-        
-        backToTop.addEventListener('click', function() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
+
+        // FAB Menu Toggle
+        function toggleFabMenu() {
+            const menu = document.getElementById('fabMenu');
+            menu.classList.toggle('show');
+        }
+
+        // Close FAB menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const fab = document.querySelector('.fab-container');
+            const menu = document.getElementById('fabMenu');
+            
+            if (fab && !fab.contains(event.target) && menu.classList.contains('show')) {
+                menu.classList.remove('show');
+            }
         });
-        
-        // Add smooth scrolling to footer links
-        document.querySelectorAll('.footer a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                // Don't prevent default - let navigation happen
-                console.log('Navigating to:', this.href);
-            });
-        });
-    });
-</script>
+
+        // Add FAB styles dynamically
+        const fabStyles = `
+            .fab-container {
+                position: fixed;
+                bottom: 90px;
+                right: 30px;
+                z-index: 998;
+            }
+
+            .fab-main {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: var(--primary-600);
+                color: white;
+                border: none;
+                font-size: 1.5rem;
+                cursor: pointer;
+                box-shadow: var(--shadow-xl);
+                transition: all var(--transition-base);
+                z-index: 999;
+            }
+
+            .fab-main:hover {
+                transform: scale(1.1) rotate(90deg);
+                background: var(--primary-700);
+            }
+
+            .fab-menu {
+                position: absolute;
+                bottom: 70px;
+                right: 5px;
+                display: none;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .fab-menu.show {
+                display: flex;
+            }
+
+            .fab-item {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background: white;
+                color: var(--primary-600);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none;
+                box-shadow: var(--shadow-lg);
+                transition: all var(--transition-fast);
+                border: 1px solid var(--gray-200);
+            }
+
+            .fab-item:hover {
+                transform: scale(1.1);
+                background: var(--primary-600);
+                color: white;
+            }
+
+            .fab-item i {
+                font-size: 1.2rem;
+            }
+        `;
+
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = fabStyles;
+        document.head.appendChild(styleSheet);
+    </script>
 </body>
 </html>
