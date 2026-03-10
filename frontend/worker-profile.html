@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Profile - AP Services</title>
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Flatpickr Calendar -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Worker Profile Specific Styles -->
+    <style>
+        /* ==================== WORKER PROFILE STYLES ==================== */
+        .profile-page {
+            background: var(--gray-50);
+            min-height: calc(100vh - var(--header-height) - var(--footer-height));
+            padding: var(--spacing-xl) 0;
+        }
+
+        /* ==================== PROFILE HEADER ==================== */
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
+            color: white;
+            padding: var(--spacing-2xl) 0;
+            margin-bottom: var(--spacing-xl);
+            border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+        }
+
+        .profile-header::after {
+            content: '';
+            position: absolute;
+            bottom: -50%;
+            left: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+        }
+
+        .profile-header .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            margin-bottom: var(--spacing-lg);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb i {
+            font-size: 0.8rem;
+        }
+
+        .profile-header-content {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xl);
+            flex-wrap: wrap;
+        }
+
+        .profile-avatar-wrapper {
+            position: relative;
+        }
+
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: var(--shadow-xl);
+            object-fit: cover;
+            background: var(--gray-200);
+        }
+
+        .verified-badge {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: var(--success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            border: 2px solid white;
+            font-size: 0.9rem;
+        }
+
+        .profile-title {
+            flex: 1;
+        }
+
+        .profile-title h1 {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-xs);
+            color: white;
+        }
+
+        .profile-title .category {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: var(--spacing-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+        }
+
+        .rating-large {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-full);
+            width: fit-content;
+        }
+
+        .rating-large i {
+            color: #fbbf24;
+        }
+
+        .rating-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-right: 4px;
+        }
+
+        .rating-count {
+            opacity: 0.8;
+            font-size: var(--font-size-sm);
+        }
+
+        /* ==================== PROFILE NAVIGATION ==================== */
+        .profile-nav {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-sm);
+            margin-bottom: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+            display: flex;
+            gap: var(--spacing-xs);
+            flex-wrap: wrap;
+        }
+
+        .profile-nav-btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            background: transparent;
+            color: var(--gray-600);
+            flex: 1;
+            white-space: nowrap;
+        }
+
+        .profile-nav-btn:hover {
+            background: var(--gray-100);
+            color: var(--primary-600);
+        }
+
+        .profile-nav-btn.active {
+            background: var(--primary-600);
+            color: white;
+        }
+
+        /* ==================== MAIN CONTENT LAYOUT ==================== */
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: var(--spacing-xl);
+        }
+
+        /* ==================== LEFT COLUMN ==================== */
+        .profile-left {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+        }
+
+        .profile-section {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .profile-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: var(--spacing-lg);
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .section-title i {
+            color: var(--primary-600);
+        }
+
+        /* About Section */
+        .about-text {
+            color: var(--gray-700);
+            line-height: 1.8;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+        }
+
+        .info-item i {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-600);
+            font-size: 1.1rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .info-item-content h4 {
+            font-size: var(--font-size-sm);
+            color: var(--gray-600);
+            margin-bottom: 2px;
+        }
+
+        .info-item-content p {
+            font-weight: 600;
+            color: var(--gray-800);
+            margin: 0;
+        }
+
+        /* Skills Section */
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+        }
+
+        .skill-badge {
+            padding: 0.6rem 1.2rem;
+            background: var(--primary-50);
+            color: var(--primary-700);
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            border: 1px solid var(--primary-200);
+            transition: all var(--transition-fast);
+        }
+
+        .skill-badge:hover {
+            background: var(--primary-600);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Portfolio Section */
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-sm);
+        }
+
+        .portfolio-item {
+            position: relative;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            aspect-ratio: 1;
+            cursor: pointer;
+        }
+
+        .portfolio-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--transition-base);
+        }
+
+        .portfolio-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .portfolio-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity var(--transition-base);
+        }
+
+        .portfolio-item:hover .portfolio-overlay {
+            opacity: 1;
+        }
+
+        .portfolio-overlay i {
+            color: white;
+            font-size: 2rem;
+        }
+
+        /* Reviews Section */
+        .reviews-summary {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xl);
+            padding: var(--spacing-lg);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-lg);
+            flex-wrap: wrap;
+        }
+
+        .average-rating {
+            text-align: center;
+        }
+
+        .average-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--gray-800);
+            line-height: 1;
+        }
+
+        .average-stars {
+            color: #fbbf24;
+            margin: var(--spacing-xs) 0;
+        }
+
+        .rating-bars {
+            flex: 1;
+        }
+
+        .rating-bar-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .rating-bar-label {
+            width: 60px;
+            font-size: var(--font-size-sm);
+            color: var(--gray-600);
+        }
+
+        .rating-bar-progress {
+            flex: 1;
+            height: 8px;
+            background: var(--gray-300);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+        }
+
+        .rating-bar-fill {
+            height: 100%;
+            background: #fbbf24;
+            border-radius: var(--radius-full);
+        }
+
+        .rating-bar-count {
+            width: 40px;
+            font-size: var(--font-size-sm);
+            color: var(--gray-600);
+            text-align: right;
+        }
+
+        /* Review Cards */
+        .review-card {
+            padding: var(--spacing-lg);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-md);
+            transition: all var(--transition-fast);
+        }
+
+        .review-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-200);
+        }
+
+        .review-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .reviewer-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-700);
+            font-weight: 700;
+        }
+
+        .reviewer-info h4 {
+            font-size: 1rem;
+            margin-bottom: 2px;
+        }
+
+        .review-date {
+            font-size: var(--font-size-xs);
+            color: var(--gray-500);
+        }
+
+        .review-rating {
+            color: #fbbf24;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .review-title {
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+            color: var(--gray-800);
+        }
+
+        .review-text {
+            color: var(--gray-600);
+            line-height: 1.6;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .review-images {
+            display: flex;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-sm);
+        }
+
+        .review-image {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .review-helpful {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-sm);
+            padding-top: var(--spacing-sm);
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .helpful-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0.4rem 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-full);
+            background: white;
+            color: var(--gray-600);
+            font-size: var(--font-size-xs);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .helpful-btn:hover {
+            background: var(--primary-50);
+            border-color: var(--primary-400);
+            color: var(--primary-600);
+        }
+
+        .helpful-btn i {
+            font-size: 0.9rem;
+        }
+
+        /* ==================== RIGHT COLUMN (BOOKING CARD) ==================== */
+        .profile-right {
+            position: sticky;
+            top: calc(var(--header-height) + var(--spacing-md));
+            height: fit-content;
+        }
+
+        .booking-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--gray-200);
+        }
+
+        .booking-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: var(--spacing-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            color: var(--gray-800);
+        }
+
+        .price-tag {
+            text-align: center;
+            padding: var(--spacing-lg);
+            background: linear-gradient(135deg, var(--primary-50), var(--primary-100));
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .price-tag .price {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-700);
+        }
+
+        .price-tag .unit {
+            color: var(--gray-600);
+            font-size: var(--font-size-sm);
+        }
+
+        .service-select {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-base);
+        }
+
+        .date-selection {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .date-selection label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        .calendar-container {
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .time-slots {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .time-slots h4 {
+            margin-bottom: var(--spacing-sm);
+            color: var(--gray-700);
+        }
+
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-xs);
+        }
+
+        .time-slot {
+            padding: 0.75rem;
+            text-align: center;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-size: var(--font-size-sm);
+        }
+
+        .time-slot:hover {
+            border-color: var(--primary-400);
+            background: var(--primary-50);
+        }
+
+        .time-slot.selected {
+            background: var(--primary-600);
+            color: white;
+            border-color: var(--primary-600);
+        }
+
+        .time-slot.booked {
+            background: var(--gray-200);
+            color: var(--gray-500);
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+
+        .booking-summary {
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-sm);
+            color: var(--gray-600);
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--gray-800);
+            padding-top: var(--spacing-sm);
+            border-top: 1px solid var(--gray-300);
+            margin-top: var(--spacing-sm);
+        }
+
+        .book-now-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary-600);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .book-now-btn:hover {
+            background: var(--primary-700);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .contact-btn {
+            width: 100%;
+            padding: 1rem;
+            background: white;
+            color: var(--primary-600);
+            border: 2px solid var(--primary-600);
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-xs);
+        }
+
+        .contact-btn:hover {
+            background: var(--primary-50);
+        }
+
+        .badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-md);
+        }
+
+        .badge {
+            padding: 0.5rem 1rem;
+            background: var(--gray-100);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            color: var(--gray-700);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .badge i {
+            color: var(--success);
+        }
+
+        /* ==================== MODAL ==================== */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-modal.show {
+            display: flex;
+        }
+
+        .modal-image {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: var(--radius-lg);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 1024px) {
+            .profile-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-right {
+                position: static;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .profile-header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .rating-large {
+                margin: 0 auto;
+            }
+
+            .profile-nav {
+                flex-direction: column;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .portfolio-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .slots-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .portfolio-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .reviews-summary {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .average-rating {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <a href="/" class="logo">AP<span>Services</span></a>
+                
+                <div class="nav-links">
+                    <!-- Dynamically populated by app.js -->
+                </div>
+                
+                <button class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Header -->
+    <section class="profile-header">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/services.html">Services</a>
+                <i class="fas fa-chevron-right"></i>
+                <span id="workerName">Rajesh Kumar</span>
+            </div>
+
+            <div class="profile-header-content">
+                <div class="profile-avatar-wrapper">
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" 
+                         alt="Profile" class="profile-avatar" id="profileAvatar">
+                    <div class="verified-badge" title="Verified Professional">
+                        <i class="fas fa-check"></i>
+                    </div>
+                </div>
+
+                <div class="profile-title">
+                    <h1 id="workerFullName">Rajesh Kumar</h1>
+                    <div class="category">
+                        <span id="workerCategory"><i class="fas fa-wrench"></i> Plumbing Expert</span>
+                        <span id="workerExperience"><i class="fas fa-briefcase"></i> 12 years experience</span>
+                    </div>
+                    
+                    <div class="rating-large">
+                        <i class="fas fa-star"></i>
+                        <span>
+                            <span class="rating-number" id="workerRating">4.9</span>
+                            <span class="rating-count">(328 reviews)</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="profile-page">
+        <div class="container">
+            <!-- Profile Navigation -->
+            <div class="profile-nav">
+                <button class="profile-nav-btn active" data-tab="about">About</button>
+                <button class="profile-nav-btn" data-tab="services">Services</button>
+                <button class="profile-nav-btn" data-tab="portfolio">Portfolio</button>
+                <button class="profile-nav-btn" data-tab="reviews">Reviews</button>
+            </div>
+
+            <div class="profile-layout">
+                <!-- Left Column - Dynamic Content -->
+                <div class="profile-left" id="profileContent">
+                    <!-- About Tab Content (Default) -->
+                    <div class="tab-content active" id="about-tab">
+                        <!-- About Section -->
+                        <div class="profile-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-user-circle"></i>
+                                About Me
+                            </h3>
+                            <p class="about-text" id="workerBio">
+                                Experienced plumber with over 12 years of experience in residential and commercial plumbing. 
+                                Specialized in leak detection, pipe installation, bathroom renovations, and emergency repairs. 
+                                Certified and insured professional committed to quality work and customer satisfaction.
+                            </p>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <div class="info-item-content">
+                                        <h4>Member Since</h4>
+                                        <p id="memberSince">Jan 2020</p>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <div class="info-item-content">
+                                        <h4>Jobs Completed</h4>
+                                        <p id="jobsCompleted">1,247</p>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <div class="info-item-content">
+                                        <h4>Service Area</h4>
+                                        <p id="serviceArea">Mumbai (Up to 15km)</p>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-clock"></i>
+                                    <div class="info-item-content">
+                                        <h4>Response Time</h4>
+                                        <p id="responseTime">&lt; 30 minutes</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skills Section -->
+                        <div class="profile-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-tools"></i>
+                                Skills & Expertise
+                            </h3>
+                            <div class="skills-container" id="skillsList">
+                                <span class="skill-badge">Pipe Installation</span>
+                                <span class="skill-badge">Leak Repair</span>
+                                <span class="skill-badge">Bathroom Fitting</span>
+                                <span class="skill-badge">Water Heater</span>
+                                <span class="skill-badge">Drain Cleaning</span>
+                                <span class="skill-badge">Emergency Repair</span>
+                            </div>
+                        </div>
+
+                        <!-- Certifications -->
+                        <div class="profile-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-certificate"></i>
+                                Certifications
+                            </h3>
+                            <div class="skills-container" id="certificationsList">
+                                <span class="skill-badge">Licensed Plumber</span>
+                                <span class="skill-badge">First Aid Certified</span>
+                                <span class="skill-badge">ISO 9001:2015</span>
+                            </div>
+                        </div>
+
+                        <!-- Languages -->
+                        <div class="profile-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-language"></i>
+                                Languages
+                            </h3>
+                            <div class="skills-container" id="languagesList">
+                                <span class="skill-badge">Hindi (Native)</span>
+                                <span class="skill-badge">English (Fluent)</span>
+                                <span class="skill-badge">Marathi</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Services Tab Content -->
+                    <div class="tab-content" id="services-tab" style="display: none;">
+                        <h3 class="section-title">
+                            <i class="fas fa-tools"></i>
+                            Services Offered
+                        </h3>
+                        <div class="services-list" id="servicesList">
+                            <!-- Dynamically loaded -->
+                        </div>
+                    </div>
+
+                    <!-- Portfolio Tab Content -->
+                    <div class="tab-content" id="portfolio-tab" style="display: none;">
+                        <h3 class="section-title">
+                            <i class="fas fa-images"></i>
+                            Work Portfolio
+                        </h3>
+                        <div class="portfolio-grid" id="portfolioGrid">
+                            <!-- Dynamically loaded -->
+                        </div>
+                    </div>
+
+                    <!-- Reviews Tab Content -->
+                    <div class="tab-content" id="reviews-tab" style="display: none;">
+                        <h3 class="section-title">
+                            <i class="fas fa-star"></i>
+                            Customer Reviews
+                        </h3>
+
+                        <!-- Reviews Summary -->
+                        <div class="reviews-summary">
+                            <div class="average-rating">
+                                <div class="average-number" id="avgRating">4.9</div>
+                                <div class="average-stars" id="avgStars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <div id="totalReviews">328 Reviews</div>
+                            </div>
+
+                            <div class="rating-bars">
+                                <div class="rating-bar-item">
+                                    <span class="rating-bar-label">5 Star</span>
+                                    <div class="rating-bar-progress">
+                                        <div class="rating-bar-fill" style="width: 85%"></div>
+                                    </div>
+                                    <span class="rating-bar-count">279</span>
+                                </div>
+                                <div class="rating-bar-item">
+                                    <span class="rating-bar-label">4 Star</span>
+                                    <div class="rating-bar-progress">
+                                        <div class="rating-bar-fill" style="width: 10%"></div>
+                                    </div>
+                                    <span class="rating-bar-count">33</span>
+                                </div>
+                                <div class="rating-bar-item">
+                                    <span class="rating-bar-label">3 Star</span>
+                                    <div class="rating-bar-progress">
+                                        <div class="rating-bar-fill" style="width: 3%"></div>
+                                    </div>
+                                    <span class="rating-bar-count">10</span>
+                                </div>
+                                <div class="rating-bar-item">
+                                    <span class="rating-bar-label">2 Star</span>
+                                    <div class="rating-bar-progress">
+                                        <div class="rating-bar-fill" style="width: 1%"></div>
+                                    </div>
+                                    <span class="rating-bar-count">4</span>
+                                </div>
+                                <div class="rating-bar-item">
+                                    <span class="rating-bar-label">1 Star</span>
+                                    <div class="rating-bar-progress">
+                                        <div class="rating-bar-fill" style="width: 1%"></div>
+                                    </div>
+                                    <span class="rating-bar-count">2</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reviews List -->
+                        <div id="reviewsList">
+                            <!-- Dynamically loaded -->
+                        </div>
+
+                        <!-- Load More Reviews -->
+                        <button class="btn-outline" style="width: 100%; margin-top: var(--spacing-lg);" id="loadMoreReviews">
+                            Load More Reviews
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Column - Booking Card (Sticky) -->
+                <div class="profile-right">
+                    <div class="booking-card">
+                        <h3><i class="fas fa-calendar-check"></i> Book Service</h3>
+
+                        <!-- Price Display -->
+                        <div class="price-tag">
+                            <span class="price" id="hourlyRate">₹499</span>
+                            <span class="unit">/hour</span>
+                        </div>
+
+                        <!-- Service Selection -->
+                        <select class="service-select" id="serviceSelect">
+                            <option value="">Select Service</option>
+                            <option value="plumbing">Plumbing Repair</option>
+                            <option value="installation">Pipe Installation</option>
+                            <option value="emergency">Emergency Service (+₹200)</option>
+                        </select>
+
+                        <!-- Date Selection -->
+                        <div class="date-selection">
+                            <label><i class="fas fa-calendar"></i> Select Date</label>
+                            <div class="calendar-container">
+                                <input type="text" id="datePicker" class="form-control" placeholder="Select date">
+                            </div>
+                        </div>
+
+                        <!-- Time Slots -->
+                        <div class="time-slots">
+                            <h4><i class="fas fa-clock"></i> Available Slots</h4>
+                            <div class="slots-grid" id="timeSlots">
+                                <!-- Dynamically loaded -->
+                            </div>
+                        </div>
+
+                        <!-- Booking Summary -->
+                        <div class="booking-summary">
+                            <div class="summary-item">
+                                <span>Service Charge</span>
+                                <span id="serviceCharge">₹499</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Duration</span>
+                                <span id="duration">1 hour</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Platform Fee</span>
+                                <span id="platformFee">₹49</span>
+                            </div>
+                            <div class="summary-total">
+                                <span>Total</span>
+                                <span id="totalAmount">₹548</span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <button class="book-now-btn" id="bookNowBtn">
+                            <i class="fas fa-calendar-check"></i> Proceed to Book
+                        </button>
+                        
+                        <button class="contact-btn" id="contactBtn">
+                            <i class="fas fa-comment"></i> Chat with Me
+                        </button>
+
+                        <!-- Badges -->
+                        <div class="badge-container">
+                            <span class="badge"><i class="fas fa-check-circle"></i> Background Verified</span>
+                            <span class="badge"><i class="fas fa-shield-alt"></i> Insured</span>
+                            <span class="badge"><i class="fas fa-clock"></i> 24/7 Available</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Image Modal -->
+    <div class="image-modal" id="imageModal">
+        <button class="modal-close"><i class="fas fa-times"></i></button>
+        <img src="" alt="Portfolio" class="modal-image" id="modalImage">
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>AP<span style="color: var(--primary-500);">Services</span></h3>
+                    <p>Your trusted platform for booking professional home services.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="/about.html">About Us</a></li>
+                        <li><a href="/contact.html">Contact</a></li>
+                        <li><a href="/privacy.html">Privacy Policy</a></li>
+                        <li><a href="/terms.html">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="/services/plumbing.html">Plumbing</a></li>
+                        <li><a href="/services/electrical.html">Electrical</a></li>
+                        <li><a href="/services/cleaning.html">Cleaning</a></li>
+                        <li><a href="/services/beauty.html">Beauty</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="/help.html">Help Center</a></li>
+                        <li><a href="/faq.html">FAQ</a></li>
+                        <li><a href="/contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 AP Services. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Container -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Flatpickr Calendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    
+    <script src="app.js"></script>
+    
+    <script>
+        // ==================== WORKER PROFILE JAVASCRIPT ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // State Management
+            let workerId = null;
+            let workerData = null;
+            let selectedDate = null;
+            let selectedTime = null;
+            let selectedService = null;
+            let currentTab = 'about';
+
+            // DOM Elements
+            const profileContent = document.getElementById('profileContent');
+            const tabButtons = document.querySelectorAll('.profile-nav-btn');
+            const datePicker = document.getElementById('datePicker');
+            const timeSlotsContainer = document.getElementById('timeSlots');
+            const serviceSelect = document.getElementById('serviceSelect');
+            const bookNowBtn = document.getElementById('bookNowBtn');
+            const contactBtn = document.getElementById('contactBtn');
+            const imageModal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+
+            // ==================== INITIALIZATION ====================
+            async function init() {
+                // Get worker ID from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                workerId = urlParams.get('id');
+                
+                if (!workerId) {
+                    Toast.show('No professional specified', 'error');
+                    setTimeout(() => window.location.href = '/services.html', 2000);
+                    return;
+                }
+
+                await loadWorkerData();
+                setupEventListeners();
+                initializeCalendar();
+                generateTimeSlots();
+                updatePrice();
+            }
+
+            // Load worker data from API
+            async function loadWorkerData() {
+                try {
+                    // In production, replace with actual API call
+                    // const response = await API.get(`/workers/${workerId}`);
+                    // workerData = response.data;
+                    
+                    // Mock data for demonstration
+                    workerData = generateMockWorkerData();
+                    renderProfile();
+                } catch (error) {
+                    console.error('Failed to load worker data:', error);
+                    Toast.show('Failed to load professional details', 'error');
+                }
+            }
+
+            function generateMockWorkerData() {
+                return {
+                    id: workerId,
+                    firstName: 'Rajesh',
+                    lastName: 'Kumar',
+                    fullName: 'Rajesh Kumar',
+                    category: 'Plumbing',
+                    experience: 12,
+                    rating: 4.9,
+                    totalReviews: 328,
+                    bio: 'Experienced plumber with over 12 years of experience in residential and commercial plumbing. Specialized in leak detection, pipe installation, bathroom renovations, and emergency repairs. Certified and insured professional committed to quality work and customer satisfaction.',
+                    memberSince: 'Jan 2020',
+                    jobsCompleted: 1247,
+                    serviceArea: 'Mumbai (Up to 15km)',
+                    responseTime: '< 30 minutes',
+                    hourlyRate: 499,
+                    skills: ['Pipe Installation', 'Leak Repair', 'Bathroom Fitting', 'Water Heater', 'Drain Cleaning', 'Emergency Repair'],
+                    certifications: ['Licensed Plumber', 'First Aid Certified', 'ISO 9001:2015'],
+                    languages: ['Hindi (Native)', 'English (Fluent)', 'Marathi'],
+                    services: [
+                        { name: 'Plumbing Repair', price: 499, duration: 1 },
+                        { name: 'Pipe Installation', price: 699, duration: 2 },
+                        { name: 'Emergency Service', price: 699, duration: 1 },
+                        { name: 'Bathroom Fitting', price: 899, duration: 3 },
+                        { name: 'Water Heater Installation', price: 599, duration: 2 }
+                    ],
+                    portfolio: [
+                        'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=300',
+                        'https://images.unsplash.com/photo-1581094794329-c8112c4e5190?w=300',
+                        'https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?w=300',
+                        'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=300',
+                        'https://images.unsplash.com/photo-1581094794329-c8112c4e5190?w=300',
+                        'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=300'
+                    ],
+                    reviews: generateMockReviews(10)
+                };
+            }
+
+            function generateMockReviews(count) {
+                const reviews = [];
+                const names = ['Amit Sharma', 'Priya Patel', 'Vikram Singh', 'Neha Gupta', 'Rahul Mehta'];
+                const titles = ['Excellent work!', 'Very professional', 'Great service', 'Highly recommended', 'Will hire again'];
+                const comments = [
+                    'Did an amazing job fixing our bathroom leaks. Very professional and punctual.',
+                    'Great work ethic and very knowledgeable. Fixed the issue quickly.',
+                    'Very satisfied with the service. Reasonable prices and quality work.',
+                    'Professional, punctual, and polite. Highly recommend!',
+                    'Excellent plumbing work. Very happy with the results.'
+                ];
+
+                for (let i = 0; i < count; i++) {
+                    reviews.push({
+                        id: i + 1,
+                        reviewerName: names[Math.floor(Math.random() * names.length)],
+                        reviewerInitials: names[Math.floor(Math.random() * names.length)].split(' ').map(n => n[0]).join(''),
+                        rating: Math.floor(Math.random() * 2) + 4,
+                        title: titles[Math.floor(Math.random() * titles.length)],
+                        comment: comments[Math.floor(Math.random() * comments.length)],
+                        date: new Date(Date.now() - Math.floor(Math.random() * 30) * 86400000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+                        helpful: Math.floor(Math.random() * 50)
+                    });
+                }
+                return reviews;
+            }
+
+            // Render profile data
+            function renderProfile() {
+                // Update header
+                document.getElementById('workerName').textContent = workerData.fullName;
+                document.getElementById('workerFullName').textContent = workerData.fullName;
+                document.getElementById('workerCategory').innerHTML = `<i class="fas fa-wrench"></i> ${workerData.category} Expert`;
+                document.getElementById('workerExperience').innerHTML = `<i class="fas fa-briefcase"></i> ${workerData.experience} years experience`;
+                document.getElementById('workerRating').textContent = workerData.rating;
+                document.querySelector('.rating-count').textContent = `(${workerData.totalReviews} reviews)`;
+
+                // About section
+                document.getElementById('workerBio').textContent = workerData.bio;
+                document.getElementById('memberSince').textContent = workerData.memberSince;
+                document.getElementById('jobsCompleted').textContent = workerData.jobsCompleted;
+                document.getElementById('serviceArea').textContent = workerData.serviceArea;
+                document.getElementById('responseTime').textContent = workerData.responseTime;
+
+                // Skills
+                document.getElementById('skillsList').innerHTML = workerData.skills.map(skill => 
+                    `<span class="skill-badge">${skill}</span>`
+                ).join('');
+
+                // Certifications
+                document.getElementById('certificationsList').innerHTML = workerData.certifications.map(cert => 
+                    `<span class="skill-badge">${cert}</span>`
+                ).join('');
+
+                // Languages
+                document.getElementById('languagesList').innerHTML = workerData.languages.map(lang => 
+                    `<span class="skill-badge">${lang}</span>`
+                ).join('');
+
+                // Price
+                document.getElementById('hourlyRate').textContent = `₹${workerData.hourlyRate}`;
+
+                // Services tab
+                renderServices();
+
+                // Portfolio tab
+                renderPortfolio();
+
+                // Reviews tab
+                renderReviews();
+            }
+
+            function renderServices() {
+                const container = document.getElementById('servicesList');
+                container.innerHTML = workerData.services.map(service => `
+                    <div class="service-card" style="margin-bottom: var(--spacing-sm);">
+                        <div class="service-content">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h4 style="margin-bottom: 4px;">${service.name}</h4>
+                                    <p style="color: var(--gray-600); font-size: var(--font-size-sm);">
+                                        Duration: ${service.duration} hour${service.duration > 1 ? 's' : ''}
+                                    </p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: 700; color: var(--primary-600);">₹${service.price}</div>
+                                    <button class="btn-small btn-outline" onclick="selectService('${service.name}', ${service.price})">
+                                        Select
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            function renderPortfolio() {
+                const container = document.getElementById('portfolioGrid');
+                container.innerHTML = workerData.portfolio.map((image, index) => `
+                    <div class="portfolio-item" onclick="openImageModal('${image}')">
+                        <img src="${image}" alt="Portfolio ${index + 1}">
+                        <div class="portfolio-overlay">
+                            <i class="fas fa-search-plus"></i>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            function renderReviews() {
+                const container = document.getElementById('reviewsList');
+                container.innerHTML = workerData.reviews.map(review => `
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="reviewer-avatar">${review.reviewerInitials}</div>
+                            <div class="reviewer-info">
+                                <h4>${review.reviewerName}</h4>
+                                <div class="review-date">${review.date}</div>
+                            </div>
+                        </div>
+                        <div class="review-rating">
+                            ${Array(5).fill(0).map((_, i) => 
+                                `<i class="fas fa-star" style="color: ${i < review.rating ? '#fbbf24' : '#d1d5db'};"></i>`
+                            ).join('')}
+                        </div>
+                        <h5 class="review-title">${review.title}</h5>
+                        <p class="review-text">${review.comment}</p>
+                        <div class="review-helpful">
+                            <button class="helpful-btn" onclick="markHelpful(${review.id})">
+                                <i class="far fa-thumbs-up"></i> Helpful (${review.helpful})
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // ==================== TAB SWITCHING ====================
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active tab button
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Show corresponding content
+                    const tabName = this.dataset.tab;
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.style.display = 'none';
+                    });
+                    document.getElementById(`${tabName}-tab`).style.display = 'block';
+                });
+            });
+
+            // ==================== CALENDAR ====================
+            function initializeCalendar() {
+                flatpickr(datePicker, {
+                    minDate: 'today',
+                    maxDate: new Date().fp_incr(30), // 30 days from now
+                    disable: [
+                        function(date) {
+                            // Disable Sundays
+                            return date.getDay() === 0;
+                        }
+                    ],
+                    onChange: function(selectedDates, dateStr) {
+                        selectedDate = dateStr;
+                        generateTimeSlots();
+                    }
+                });
+            }
+
+            // ==================== TIME SLOTS ====================
+            function generateTimeSlots() {
+                const slots = [
+                    '09:00 AM', '10:00 AM', '11:00 AM', 
+                    '12:00 PM', '02:00 PM', '03:00 PM', 
+                    '04:00 PM', '05:00 PM', '06:00 PM'
+                ];
+
+                timeSlotsContainer.innerHTML = slots.map((slot, index) => {
+                    // Simulate some booked slots
+                    const isBooked = [2, 5].includes(index);
+                    return `
+                        <div class="time-slot ${isBooked ? 'booked' : ''}" 
+                             onclick="${!isBooked ? 'selectTimeSlot(this)' : ''}"
+                             data-time="${slot}">
+                            ${slot}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            window.selectTimeSlot = function(element) {
+                if (element.classList.contains('booked')) return;
+                
+                document.querySelectorAll('.time-slot').forEach(slot => {
+                    slot.classList.remove('selected');
+                });
+                element.classList.add('selected');
+                selectedTime = element.dataset.time;
+                updatePrice();
+            };
+
+            // ==================== SERVICE SELECTION ====================
+            serviceSelect.addEventListener('change', function() {
+                selectedService = this.value;
+                updatePrice();
+            });
+
+            window.selectService = function(serviceName, price) {
+                // Find and select in dropdown
+                const options = serviceSelect.options;
+                for (let i = 0; i < options.length; i++) {
+                    if (options[i].text.includes(serviceName)) {
+                        serviceSelect.selectedIndex = i;
+                        selectedService = options[i].value;
+                        break;
+                    }
+                }
+                updatePrice();
+            };
+
+            // ==================== PRICE CALCULATION ====================
+            function updatePrice() {
+                let basePrice = workerData?.hourlyRate || 499;
+                let platformFee = Math.round(basePrice * 0.1); // 10% platform fee
+                let total = basePrice + platformFee;
+
+                document.getElementById('serviceCharge').textContent = `₹${basePrice}`;
+                document.getElementById('platformFee').textContent = `₹${platformFee}`;
+                document.getElementById('totalAmount').textContent = `₹${total}`;
+            }
+
+            // ==================== BOOKING ====================
+            bookNowBtn.addEventListener('click', function() {
+                if (!Auth.checkAuth()) {
+                    Toast.show('Please login to book a service', 'warning');
+                    window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.href)}`;
+                    return;
+                }
+
+                if (!selectedDate) {
+                    Toast.show('Please select a date', 'error');
+                    return;
+                }
+
+                if (!selectedTime) {
+                    Toast.show('Please select a time slot', 'error');
+                    return;
+                }
+
+                if (!selectedService) {
+                    Toast.show('Please select a service', 'error');
+                    return;
+                }
+
+                // Navigate to booking page with parameters
+                window.location.href = `/booking.html?worker=${workerId}&date=${selectedDate}&time=${selectedTime}&service=${selectedService}`;
+            });
+
+            // ==================== CHAT ====================
+            contactBtn.addEventListener('click', function() {
+                if (!Auth.checkAuth()) {
+                    Toast.show('Please login to chat', 'warning');
+                    window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.href)}`;
+                    return;
+                }
+
+                // Open chat modal or navigate to chat page
+                window.location.href = `/chat.html?worker=${workerId}`;
+            });
+
+            // ==================== IMAGE MODAL ====================
+            window.openImageModal = function(imageSrc) {
+                modalImage.src = imageSrc;
+                imageModal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            };
+
+            document.querySelector('.modal-close').addEventListener('click', function() {
+                imageModal.classList.remove('show');
+                document.body.style.overflow = 'auto';
+            });
+
+            imageModal.addEventListener('click', function(e) {
+                if (e.target === imageModal) {
+                    imageModal.classList.remove('show');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+
+            // ==================== MARK HELPFUL ====================
+            window.markHelpful = function(reviewId) {
+                if (!Auth.checkAuth()) {
+                    Toast.show('Please login to mark helpful', 'warning');
+                    return;
+                }
+
+                // In production, call API
+                Toast.show('Thank you for your feedback!', 'success');
+            };
+
+            // ==================== LOAD MORE REVIEWS ====================
+            document.getElementById('loadMoreReviews').addEventListener('click', function() {
+                Toast.show('Loading more reviews...', 'info');
+                // In production, load next page of reviews
+            });
+
+            // ==================== EVENT LISTENERS ====================
+            function setupEventListeners() {
+                // Keyboard navigation for modal
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && imageModal.classList.contains('show')) {
+                        imageModal.classList.remove('show');
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+            }
+
+            // Initialize
+            init();
+        });
+    </script>
+</body>
+</html>
