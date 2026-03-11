@@ -2,14 +2,15 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const path = require('path');
 
 // Load environment variables
 dotenv.config();
 
 // Import database
-const authRoutes = require('./routes/auth');
 const db = require('./config/database');
+
+// Import routes
+const authRoutes = require('./routes/auth');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,14 +23,11 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Test database connection on startup
-db.testConnection().then(connected => {
-    if (connected) {
-        console.log('✅ Database is ready');
-    } else {
-        console.warn('⚠️ Database connection failed - API will still work but DB features unavailable');
-    }
-});
+// Test database connection
+db.testConnection();
+
+// Routes
+app.use('/api/auth', authRoutes);
 
 // Test route
 app.get('/', (req, res) => {
@@ -44,9 +42,7 @@ app.get('/', (req, res) => {
 // API Health check
 app.get('/api/health', async (req, res) => {
     try {
-        // Test database query
         const dbResult = await db.query('SELECT NOW() as time');
-        
         res.json({ 
             success: true, 
             message: 'Backend is healthy',
@@ -60,11 +56,7 @@ app.get('/api/health', async (req, res) => {
         res.json({ 
             success: true, 
             message: 'Backend is healthy',
-            environment: process.env.NODE_ENV || 'development',
-            database: {
-                status: 'disconnected',
-                error: error.message
-            }
+            database: { status: 'disconnected' }
         });
     }
 });
@@ -76,6 +68,7 @@ app.listen(PORT, () => {
     console.log('=================================');
     console.log(`✅ Server: http://localhost:${PORT}`);
     console.log(`✅ Health: http://localhost:${PORT}/api/health`);
+    console.log(`✅ Auth: http://localhost:${PORT}/api/auth/register`);
     console.log(`✅ Frontend: https://ap-services-xi.vercel.app`);
     console.log('=================================\n');
 });
