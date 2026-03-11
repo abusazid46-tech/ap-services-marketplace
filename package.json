@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "description": "AP Services Marketplace - Complete Platform",
   "main": "backend/server.js",
-  "scripts": {
+   "scripts": {
     "start": "node backend/server.js",
     "dev": "nodemon backend/server.js",
-    "test-db": "node backend/test-db.js"
-  },
+    "test-db": "node backend/test-db.js",
+    "db:schema": "node database/run-schema.js"
+  }
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
