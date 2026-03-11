@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node backend/server.js",
     "dev": "nodemon backend/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test-db": "node backend/test-db.js"
   },
   "dependencies": {
     "express": "^4.18.2",
