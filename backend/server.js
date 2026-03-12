@@ -27,6 +27,8 @@ app.use(express.urlencoded({ extended: true }));
 // Test database connection
 db.testConnection();
 
+app.use('/api/workers', workerRoutes);
+
 // Routes
 app.use('/api/auth', authRoutes);
 
