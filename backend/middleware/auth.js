@@ -62,4 +62,23 @@ exports.optionalAuth = (req, res, next) => {
         // Ignore token errors for optional auth
         next();
     }
+    // Add this function to existing auth.js
+exports.authorizeRoles = (...roles) => {
+    return (req, res, next) => {
+        if (!req.userRole) {
+            return res.status(401).json({
+                success: false,
+                message: 'Not authorized'
+            });
+        }
+
+        if (!roles.includes(req.userRole)) {
+            return res.status(403).json({
+                success: false,
+                message: `Access denied. Required role: ${roles.join(' or ')}`
+            });
+        }
+
+        next();
+    };
 };
