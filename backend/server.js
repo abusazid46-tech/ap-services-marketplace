@@ -11,6 +11,7 @@ const db = require('./config/database');
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const workerRoutes = require('./routes/workers');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
