@@ -1,36 +1,35 @@
-// backend/config/database.js
-const { Pool } = require('pg');
-require('dotenv').config();
+const { Pool } = require("pg");
+require("dotenv").config();
 
-// Create PostgreSQL connection pool
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false // Required for Supabase
-    }
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  },
+  max: 5,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000
 });
 
-// Test database connection
+// Test connection
 const testConnection = async () => {
-    try {
-        const client = await pool.connect();
-        console.log('✅ PostgreSQL connected successfully');
-        console.log('📊 Database:', process.env.DB_NAME || 'Supabase DB');
-        
-        // Test query
-        const result = await client.query('SELECT NOW() as current_time');
-        console.log('🕒 Server time:', result.rows[0].current_time);
-        
-        client.release();
-        return true;
-    } catch (error) {
-        console.error('❌ Database connection error:', error.message);
-        return false;
-    }
+  try {
+    const client = await pool.connect();
+    console.log("✅ PostgreSQL connected successfully");
+
+    const result = await client.query("SELECT NOW()");
+    console.log("🕒 Database time:", result.rows[0].now);
+
+    client.release();
+    return true;
+  } catch (error) {
+    console.error("❌ Database connection error:", error);
+    return false;
+  }
 };
 
 module.exports = {
-    query: (text, params) => pool.query(text, params),
-    pool,
-    testConnection
+  query: (text, params) => pool.query(text, params),
+  pool,
+  testConnection
 };
