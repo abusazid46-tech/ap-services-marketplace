@@ -3,33 +3,26 @@ require("dotenv").config();
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  },
+  ssl: { rejectUnauthorized: false },
   max: 5,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000
+  connectionTimeoutMillis: 10000,
+  statement_timeout: 5000
 });
 
-// Test connection
 const testConnection = async () => {
   try {
-    const client = await pool.connect();
-    console.log("✅ PostgreSQL connected successfully");
-
-    const result = await client.query("SELECT NOW()");
-    console.log("🕒 Database time:", result.rows[0].now);
-
-    client.release();
+    const result = await pool.query("SELECT NOW()");
+    console.log("✅ PostgreSQL connected");
+    console.log("Time:", result.rows[0].now);
     return true;
   } catch (error) {
-    console.error("❌ Database connection error:", error);
+    console.error("❌ DB error:", error);
     return false;
   }
 };
 
 module.exports = {
   query: (text, params) => pool.query(text, params),
-  pool,
   testConnection
 };
