@@ -6,6 +6,7 @@ const dotenv = require('dotenv');
 // Load environment variables
 dotenv.config();
 
+const serviceRoutes = require('./routes/services');
 // Import database
 const db = require('./config/database');
 
@@ -28,6 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 db.testConnection();
 
 app.use('/api/workers', workerRoutes);
+app.use('/api/services', serviceRoutes);
 
 // Routes
 app.use('/api/auth', authRoutes);
