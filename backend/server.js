@@ -9,6 +9,7 @@ dotenv.config();
 const serviceRoutes = require('./routes/services');
 // Import database
 const db = require('./config/database');
+const bookingRoutes = require('./routes/bookings');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -28,11 +29,11 @@ app.use(express.urlencoded({ extended: true }));
 // Test database connection
 db.testConnection();
 
-app.use('/api/workers', workerRoutes);
-app.use('/api/services', serviceRoutes);
-
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/workers', workerRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 // Test route
 app.get('/', (req, res) => {
