@@ -1372,51 +1372,10 @@
     <!-- Toast Container -->
     <div id="toast" class="toast"></div>
 
+    <!-- Load the real app.js with API calls -->
+    <script src="app.js"></script>
+    
     <script>
-        // ==================== TOAST NOTIFICATION SYSTEM ====================
-        const Toast = {
-            element: document.getElementById('toast'),
-            timeout: null,
-            
-            show(message, type = 'info', duration = 3000) {
-                if (this.timeout) {
-                    clearTimeout(this.timeout);
-                }
-                
-                this.element.className = `toast ${type} show`;
-                this.element.innerHTML = `<i class="fas ${this.getIcon(type)}"></i> ${message}`;
-                
-                this.timeout = setTimeout(() => {
-                    this.element.classList.remove('show');
-                }, duration);
-            },
-            
-            getIcon(type) {
-                const icons = {
-                    success: 'fa-check-circle',
-                    error: 'fa-exclamation-circle',
-                    warning: 'fa-exclamation-triangle',
-                    info: 'fa-info-circle'
-                };
-                return icons[type] || icons.info;
-            }
-        };
-
-        // ==================== AUTH SERVICE MOCK ====================
-        const Auth = {
-            async register(userData) {
-                console.log('Registering user:', userData);
-                
-                // Simulate API call
-                return new Promise((resolve) => {
-                    setTimeout(() => {
-                        Toast.show('Registration successful! Redirecting...', 'success');
-                        resolve({ success: true });
-                    }, 1500);
-                });
-            }
-        };
-
         // ==================== REGISTRATION PAGE JAVASCRIPT ====================
         document.addEventListener('DOMContentLoaded', function() {
             // DOM Elements
@@ -1807,7 +1766,7 @@
                 Toast.show('OTP resent successfully!', 'success');
             });
 
-            // ==================== FORM SUBMISSION ====================
+            // ==================== FORM SUBMISSION - REAL BACKEND ====================
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
@@ -1836,23 +1795,19 @@
                         email: document.getElementById('email').value,
                         phone: document.getElementById('phone').value,
                         password: document.getElementById('password').value,
-                        user_type: userType,
-                        city: document.getElementById('city').value,
-                        address: document.getElementById('address').value,
-                        pincode: document.getElementById('pincode').value,
-                        locality: document.getElementById('locality').value,
-                        accept_updates: document.getElementById('updates').checked
+                        user_type: userType
                     };
                     
-                    // Add worker specific data
-                    if (userType === 'worker') {
-                        registrationData.experience = document.getElementById('experience').value;
-                        registrationData.skills = selectedSkills;
-                        registrationData.hourly_rate = document.getElementById('hourlyRate').value;
-                        // In production, you'd upload files to server and get URLs
+                    // Add optional fields if present
+                    if (document.getElementById('city').value) {
+                        registrationData.city = document.getElementById('city').value;
                     }
                     
-                    // Call registration API
+                    if (document.getElementById('address').value) {
+                        registrationData.address = document.getElementById('address').value;
+                    }
+                    
+                    // Call the REAL Auth.register from app.js
                     const response = await Auth.register(registrationData);
                     
                     if (response && response.success) {
