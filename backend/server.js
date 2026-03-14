@@ -16,7 +16,7 @@ const adminRoutes = require('./routes/admin');
 // Import routes
 const authRoutes = require('./routes/auth');
 const workerRoutes = require('./routes/workers');
-
+const serviceRoutes = require('./routes/services');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
