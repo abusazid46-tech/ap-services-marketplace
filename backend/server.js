@@ -20,11 +20,34 @@ const workerRoutes = require('./routes/workers');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
+// ==================== FIXED CORS CONFIGURATION ====================
+const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:5000',
+    'https://ap-services-xi.vercel.app',
+    'https://ap-services-marketplace.vercel.app', // YOUR ACTUAL FRONTEND URL
+    'https://ap-services-marketplace.onrender.com' // Your backend itself
+];
+
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://ap-services-xi.vercel.app'],
-    credentials: true
+    origin: function(origin, callback) {
+        // Allow requests with no origin (like mobile apps, curl, etc)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
+
+// Handle preflight requests
+app.options('*', cors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -45,7 +68,7 @@ app.get('/', (req, res) => {
         message: 'AP Services API is running',
         status: 'online',
         timestamp: new Date().toISOString(),
-        frontend: 'https://ap-services-xi.vercel.app'
+        frontend: 'https://ap-services-marketplace.vercel.app' // Updated
     });
 });
 
@@ -71,6 +94,15 @@ app.get('/api/health', async (req, res) => {
     }
 });
 
+// ==================== ERROR HANDLING MIDDLEWARE ====================
+app.use((err, req, res, next) => {
+    console.error('Error:', err.message);
+    res.status(500).json({
+        success: false,
+        message: err.message || 'Internal server error'
+    });
+});
+
 // Start server
 app.listen(PORT, () => {
     console.log('\n=================================');
@@ -79,6 +111,7 @@ app.listen(PORT, () => {
     console.log(`✅ Server: http://localhost:${PORT}`);
     console.log(`✅ Health: http://localhost:${PORT}/api/health`);
     console.log(`✅ Auth: http://localhost:${PORT}/api/auth/register`);
-    console.log(`✅ Frontend: https://ap-services-xi.vercel.app`);
+    console.log(`✅ Frontend: https://ap-services-marketplace.vercel.app`);
+    console.log(`✅ Allowed Origins:`, allowedOrigins);
     console.log('=================================\n');
 });
