@@ -706,7 +706,7 @@
             transition: all var(--transition-fast);
         }
 
-        .pagination-btn:hover {
+        .pagination-btn:hover:not(:disabled) {
             background: var(--primary-50);
             border-color: var(--primary-400);
         }
@@ -717,7 +717,7 @@
             border-color: var(--primary-600);
         }
 
-        .pagination-btn.disabled {
+        .pagination-btn.disabled, .pagination-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
@@ -983,14 +983,14 @@
                             <i class="fas fa-map-marker-alt"></i>
                             <select id="citySelect">
                                 <option value="">All Cities</option>
-                                <option value="mumbai">Mumbai</option>
-                                <option value="delhi">Delhi-NCR</option>
-                                <option value="bangalore">Bangalore</option>
-                                <option value="pune">Pune</option>
-                                <option value="chennai">Chennai</option>
-                                <option value="kolkata">Kolkata</option>
-                                <option value="hyderabad">Hyderabad</option>
-                                <option value="ahmedabad">Ahmedabad</option>
+                                <option value="Mumbai">Mumbai</option>
+                                <option value="Delhi">Delhi-NCR</option>
+                                <option value="Bangalore">Bangalore</option>
+                                <option value="Pune">Pune</option>
+                                <option value="Chennai">Chennai</option>
+                                <option value="Kolkata">Kolkata</option>
+                                <option value="Hyderabad">Hyderabad</option>
+                                <option value="Ahmedabad">Ahmedabad</option>
                             </select>
                         </div>
                     </div>
@@ -1082,69 +1082,57 @@
     <script src="app.js"></script>
     
     <script>
-        // ==================== SERVICES PAGE JAVASCRIPT ====================
-        document.addEventListener('DOMContentLoaded', function() {
-            // State Management
-            let currentPage = 1;
-            let totalPages = 1;
-            let isLoading = false;
-            let allServices = [];
-            let filteredServices = [];
-            let activeFilters = {
-                search: '',
-                city: '',
-                categories: [],
-                ratings: [],
-                minPrice: null,
-                maxPrice: null,
-                availableToday: false,
-                verifiedOnly: false,
-                sortBy: 'recommended'
-            };
-
-            // DOM Elements
-            const servicesGrid = document.getElementById('servicesGrid');
-            const resultsCount = document.getElementById('totalCount');
-            const pagination = document.getElementById('pagination');
-            const searchInput = document.getElementById('servicesSearch');
-            const filterSearch = document.getElementById('filterSearch');
-            const citySelect = document.getElementById('citySelect');
-            const sortSelect = document.getElementById('sortBy');
-            const clearFiltersBtn = document.getElementById('clearFilters');
-            const availableTodayToggle = document.getElementById('availableToday');
-            const verifiedCheckbox = document.getElementById('verifiedOnly');
-            const minPrice = document.getElementById('minPrice');
-            const maxPrice = document.getElementById('maxPrice');
-            const mobileFilterToggle = document.getElementById('mobileFilterToggle');
-            const filtersSidebar = document.getElementById('filtersSidebar');
-            const applyFiltersMobile = document.getElementById('applyFiltersMobile');
-
-            // ==================== INITIALIZATION ====================
-            async function init() {
-                showSkeleton();
-                await loadServices();
-                setupEventListeners();
-                checkUrlParams();
+        // ==================== TOAST NOTIFICATION SYSTEM ====================
+        const Toast = {
+            element: document.getElementById('toast'),
+            timeout: null,
+            
+            show(message, type = 'info', duration = 3000) {
+                if (this.timeout) {
+                    clearTimeout(this.timeout);
+                }
+                
+                this.element.className = `toast ${type} show`;
+                this.element.innerHTML = `<i class="fas ${this.getIcon(type)}"></i> ${message}`;
+                
+                this.timeout = setTimeout(() => {
+                    this.element.classList.remove('show');
+                }, duration);
+            },
+            
+            getIcon(type) {
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-circle',
+                    warning: 'fa-exclamation-triangle',
+                    info: 'fa-info-circle'
+                };
+                return icons[type] || icons.info;
             }
+        };
 
-            // Load services from API
-            async function loadServices() {
+        // ==================== SERVICES API SERVICE ====================
+        const ServicesAPI = {
+            baseUrl: '/api/services',
+            
+            async getAll(category = null, search = null) {
                 try {
                     // In production, replace with actual API call
-                    // const response = await API.get('/services');
-                    // allServices = response.data;
+                    // const params = new URLSearchParams();
+                    // if (category) params.append('category', category);
+                    // if (search) params.append('search', search);
+                    // const response = await fetch(`${this.baseUrl}?${params.toString()}`);
+                    // return await response.json();
                     
                     // Mock data for demonstration
-                    allServices = generateMockServices();
-                    applyFilters();
+                    return this.generateMockServices(category, search);
                 } catch (error) {
-                    console.error('Failed to load services:', error);
-                    Toast.show('Failed to load services', 'error');
+                    console.error('API Error:', error);
+                    throw error;
                 }
-            }
-
-            // Generate mock services (replace with actual API data)
-            function generateMockServices() {
+            },
+            
+            generateMockServices(category, search) {
                 const categories = [
                     'Plumbing', 'Electrical', 'Painting', 'Cleaning', 
                     'Carpentry', 'Beauty', 'AC Repair', 'Tutoring',
@@ -1152,268 +1140,180 @@
                     'Web Development', 'App Development', 'CCTV Installation'
                 ];
                 
+                const cities = ['Mumbai', 'Delhi', 'Bangalore', 'Pune', 'Chennai', 'Kolkata', 'Hyderabad', 'Ahmedabad'];
                 const services = [];
                 
                 for (let i = 1; i <= 50; i++) {
-                    const category = categories[Math.floor(Math.random() * categories.length)];
+                    const serviceCategory = categories[Math.floor(Math.random() * categories.length)];
                     const rating = (3.5 + Math.random() * 1.5).toFixed(1);
                     const bookings = Math.floor(Math.random() * 500) + 50;
                     const price = Math.floor(Math.random() * 800) + 199;
                     
-                    services.push({
+                    const service = {
                         id: i,
-                        name: `${category} Service`,
-                        category: category,
-                        description: `Professional ${category.toLowerCase()} service for your home. Quality work guaranteed.`,
-                        rating: rating,
+                        name: `${serviceCategory} Service`,
+                        category: serviceCategory,
+                        description: `Professional ${serviceCategory.toLowerCase()} service for your home. Quality work guaranteed.`,
+                        rating: parseFloat(rating),
                         totalBookings: bookings,
                         price: price,
                         oldPrice: Math.floor(price * 1.2),
-                        image: `https://source.unsplash.com/300x200/?${category.toLowerCase()}`,
+                        image: `https://source.unsplash.com/300x200/?${serviceCategory.toLowerCase()}`,
                         providerName: `Provider ${i}`,
                         providerInitials: `P${i}`,
                         availableToday: Math.random() > 0.3,
                         verified: Math.random() > 0.2,
-                        city: ['Mumbai', 'Delhi', 'Bangalore', 'Pune'][Math.floor(Math.random() * 4)]
-                    });
+                        city: cities[Math.floor(Math.random() * cities.length)]
+                    };
+                    
+                    // Apply filters if provided
+                    if (category && service.category.toLowerCase() !== category.toLowerCase()) {
+                        continue;
+                    }
+                    
+                    if (search) {
+                        const searchLower = search.toLowerCase();
+                        const matches = service.name.toLowerCase().includes(searchLower) ||
+                                      service.category.toLowerCase().includes(searchLower) ||
+                                      service.description.toLowerCase().includes(searchLower);
+                        if (!matches) continue;
+                    }
+                    
+                    services.push(service);
                 }
                 
                 return services;
             }
+        };
 
-            // ==================== FILTERING ====================
-            function applyFilters() {
-                let filtered = [...allServices];
+        // ==================== SERVICES PAGE JAVASCRIPT ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            loadServices();
+        });
 
-                // Search filter
-                if (activeFilters.search) {
-                    const searchLower = activeFilters.search.toLowerCase();
-                    filtered = filtered.filter(service => 
-                        service.name.toLowerCase().includes(searchLower) ||
-                        service.category.toLowerCase().includes(searchLower) ||
-                        service.description.toLowerCase().includes(searchLower)
-                    );
+        // Main function to load services based on URL parameters
+        async function loadServices() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const category = urlParams.get('category');
+            const search = urlParams.get('q');
+            
+            try {
+                showSkeleton();
+                const services = await ServicesAPI.getAll(category, search);
+                displayServices(services);
+                
+                // Update UI with category from URL
+                if (category) {
+                    document.getElementById('servicesSearch').value = category;
+                    document.getElementById('filterSearch').value = category;
                 }
-
-                // City filter
-                if (activeFilters.city) {
-                    filtered = filtered.filter(service => 
-                        service.city.toLowerCase() === activeFilters.city.toLowerCase()
-                    );
+                if (search) {
+                    document.getElementById('servicesSearch').value = search;
+                    document.getElementById('filterSearch').value = search;
                 }
-
-                // Category filters
-                if (activeFilters.categories.length > 0) {
-                    filtered = filtered.filter(service => 
-                        activeFilters.categories.includes(service.category)
-                    );
-                }
-
-                // Rating filter
-                if (activeFilters.ratings.length > 0) {
-                    filtered = filtered.filter(service => {
-                        return activeFilters.ratings.some(rating => 
-                            service.rating >= parseInt(rating)
-                        );
-                    });
-                }
-
-                // Price range
-                if (activeFilters.minPrice !== null) {
-                    filtered = filtered.filter(service => 
-                        service.price >= activeFilters.minPrice
-                    );
-                }
-                if (activeFilters.maxPrice !== null) {
-                    filtered = filtered.filter(service => 
-                        service.price <= activeFilters.maxPrice
-                    );
-                }
-
-                // Availability
-                if (activeFilters.availableToday) {
-                    filtered = filtered.filter(service => service.availableToday);
-                }
-
-                // Verified only
-                if (activeFilters.verifiedOnly) {
-                    filtered = filtered.filter(service => service.verified);
-                }
-
-                // Sorting
-                switch(activeFilters.sortBy) {
-                    case 'price_low':
-                        filtered.sort((a, b) => a.price - b.price);
-                        break;
-                    case 'price_high':
-                        filtered.sort((a, b) => b.price - a.price);
-                        break;
-                    case 'rating':
-                        filtered.sort((a, b) => b.rating - a.rating);
-                        break;
-                    case 'popular':
-                        filtered.sort((a, b) => b.totalBookings - a.totalBookings);
-                        break;
-                    default:
-                        // Recommended - mix of rating and popularity
-                        filtered.sort((a, b) => 
-                            (b.rating * 0.6 + b.totalBookings * 0.4) - 
-                            (a.rating * 0.6 + a.totalBookings * 0.4)
-                        );
-                }
-
-                filteredServices = filtered;
-                totalPages = Math.ceil(filtered.length / 12);
-                renderServices();
-                updateResultsCount();
-                renderPagination();
+            } catch (error) {
+                console.error('Failed to load services:', error);
+                Toast.show('Failed to load services', 'error');
             }
+        }
 
-            // ==================== RENDERING ====================
-            function renderServices() {
-                const start = (currentPage - 1) * 12;
-                const end = start + 12;
-                const pageServices = filteredServices.slice(start, end);
-
-                if (pageServices.length === 0) {
-                    renderEmptyState();
-                    return;
-                }
-
-                servicesGrid.innerHTML = pageServices.map(service => `
-                    <div class="service-card" onclick="viewService(${service.id})">
-                        ${service.availableToday ? '<div class="service-badge">Available Today</div>' : ''}
-                        <div class="service-image">
-                            <img src="${service.image}" alt="${service.name}">
-                        </div>
-                        <div class="service-content">
-                            <div class="service-category">${service.category}</div>
-                            <h3>${service.name}</h3>
-                            <p class="service-description">${service.description}</p>
-                            
-                            <div class="service-meta">
-                                <span class="service-rating">
-                                    <i class="fas fa-star"></i> ${service.rating}
-                                </span>
-                                <span class="service-bookings">
-                                    <i class="fas fa-users"></i> ${service.totalBookings}+ bookings
-                                </span>
-                            </div>
-                            
-                            <div class="service-price">
-                                <span class="current-price">₹${service.price}</span>
-                                <span class="old-price">₹${service.oldPrice}</span>
-                                <span class="price-unit">/hour</span>
-                            </div>
-                            
-                            <div class="service-footer">
-                                <div class="provider-info">
-                                    <div class="provider-avatar">${service.providerInitials}</div>
-                                    <span class="provider-name">${service.providerName}</span>
-                                    ${service.verified ? '<i class="fas fa-check-circle" style="color: var(--success);" title="Verified"></i>' : ''}
-                                </div>
-                                <button class="book-btn" onclick="event.stopPropagation(); bookService(${service.id})">
-                                    Book Now
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            function renderEmptyState() {
+        // Display services in the grid
+        function displayServices(services) {
+            const servicesGrid = document.getElementById('servicesGrid');
+            const resultsCount = document.getElementById('totalCount');
+            
+            if (!services || services.length === 0) {
                 servicesGrid.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-search"></i>
                         <h3>No services found</h3>
-                        <p>Try adjusting your filters or search criteria</p>
+                        <p>Try adjusting your search or filters</p>
                         <button class="btn-primary" onclick="clearAllFilters()">
                             Clear All Filters
                         </button>
                     </div>
                 `;
+                resultsCount.textContent = '0';
+                return;
             }
-
-            function showSkeleton() {
-                servicesGrid.innerHTML = `
-                    <div class="skeleton-grid">
-                        ${Array(6).fill(0).map(() => `
-                            <div class="skeleton-card">
-                                <div class="skeleton-image"></div>
-                                <div class="skeleton-line short"></div>
-                                <div class="skeleton-line"></div>
-                                <div class="skeleton-line"></div>
-                                <div class="skeleton-line short"></div>
-                            </div>
-                        `).join('')}
+            
+            resultsCount.textContent = services.length;
+            
+            servicesGrid.innerHTML = services.map(service => `
+                <div class="service-card" onclick="viewService(${service.id})">
+                    ${service.availableToday ? '<div class="service-badge">Available Today</div>' : ''}
+                    <div class="service-image">
+                        <img src="${service.image}" alt="${service.name}">
                     </div>
-                `;
-            }
-
-            function updateResultsCount() {
-                resultsCount.textContent = filteredServices.length;
-            }
-
-            // ==================== PAGINATION ====================
-            function renderPagination() {
-                if (totalPages <= 1) {
-                    pagination.innerHTML = '';
-                    return;
-                }
-
-                let paginationHTML = '';
-                
-                // Previous button
-                paginationHTML += `
-                    <button class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" 
-                            onclick="changePage(${currentPage - 1})" 
-                            ${currentPage === 1 ? 'disabled' : ''}>
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                `;
-
-                // Page numbers
-                for (let i = 1; i <= totalPages; i++) {
-                    if (
-                        i === 1 || 
-                        i === totalPages || 
-                        (i >= currentPage - 2 && i <= currentPage + 2)
-                    ) {
-                        paginationHTML += `
-                            <button class="pagination-btn ${i === currentPage ? 'active' : ''}" 
-                                    onclick="changePage(${i})">
-                                ${i}
+                    <div class="service-content">
+                        <div class="service-category">${service.category}</div>
+                        <h3>${service.name}</h3>
+                        <p class="service-description">${service.description}</p>
+                        
+                        <div class="service-meta">
+                            <span class="service-rating">
+                                <i class="fas fa-star"></i> ${service.rating}
+                            </span>
+                            <span class="service-bookings">
+                                <i class="fas fa-users"></i> ${service.totalBookings}+ bookings
+                            </span>
+                        </div>
+                        
+                        <div class="service-price">
+                            <span class="current-price">₹${service.price}</span>
+                            <span class="old-price">₹${service.oldPrice}</span>
+                            <span class="price-unit">/hour</span>
+                        </div>
+                        
+                        <div class="service-footer">
+                            <div class="provider-info">
+                                <div class="provider-avatar">${service.providerInitials}</div>
+                                <span class="provider-name">${service.providerName}</span>
+                                ${service.verified ? '<i class="fas fa-check-circle" style="color: var(--success);" title="Verified"></i>' : ''}
+                            </div>
+                            <button class="book-btn" onclick="event.stopPropagation(); bookService(${service.id})">
+                                Book Now
                             </button>
-                        `;
-                    } else if (i === currentPage - 3 || i === currentPage + 3) {
-                        paginationHTML += `<span class="pagination-btn disabled">...</span>`;
-                    }
-                }
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Initialize filters with services data
+            initializeFilters(services);
+        }
 
-                // Next button
-                paginationHTML += `
-                    <button class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" 
-                            onclick="changePage(${currentPage + 1})"
-                            ${currentPage === totalPages ? 'disabled' : ''}>
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                `;
+        // Show loading skeleton
+        function showSkeleton() {
+            const servicesGrid = document.getElementById('servicesGrid');
+            servicesGrid.innerHTML = `
+                <div class="skeleton-grid">
+                    ${Array(6).fill(0).map(() => `
+                        <div class="skeleton-card">
+                            <div class="skeleton-image"></div>
+                            <div class="skeleton-line short"></div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line short"></div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
 
-                pagination.innerHTML = paginationHTML;
-            }
-
-            // ==================== CATEGORY FILTERS ====================
-            function renderCategoryFilters() {
-                const categories = [...new Set(allServices.map(s => s.category))];
-                const container = document.getElementById('categoryFilters');
-                
+        // Initialize filters with service categories
+        function initializeFilters(services) {
+            const categories = [...new Set(services.map(s => s.category))];
+            const container = document.getElementById('categoryFilters');
+            
+            if (container) {
                 container.innerHTML = categories.map(category => {
-                    const count = allServices.filter(s => s.category === category).length;
+                    const count = services.filter(s => s.category === category).length;
                     return `
                         <div class="filter-option">
                             <input type="checkbox" class="category-filter" 
-                                   value="${category}" id="cat_${category}">
-                            <label for="cat_${category}">${category}</label>
+                                   value="${category}" id="cat_${category.replace(/\s+/g, '_')}">
+                            <label for="cat_${category.replace(/\s+/g, '_')}">${category}</label>
                             <span class="count">${count}</span>
                         </div>
                     `;
@@ -1421,228 +1321,52 @@
 
                 // Add event listeners to category checkboxes
                 document.querySelectorAll('.category-filter').forEach(cb => {
-                    cb.addEventListener('change', function() {
-                        if (this.checked) {
-                            activeFilters.categories.push(this.value);
-                        } else {
-                            activeFilters.categories = activeFilters.categories.filter(c => c !== this.value);
-                        }
-                        currentPage = 1;
-                        applyFilters();
-                        updateUrlParams();
-                    });
+                    cb.addEventListener('change', filterServices);
                 });
             }
+        }
 
-            // ==================== EVENT LISTENERS ====================
-            function setupEventListeners() {
-                // Search input (debounced)
-                let searchTimeout;
-                searchInput.addEventListener('input', function() {
-                    clearTimeout(searchTimeout);
-                    searchTimeout = setTimeout(() => {
-                        activeFilters.search = this.value;
-                        filterSearch.value = this.value;
-                        currentPage = 1;
-                        applyFilters();
-                        updateUrlParams();
-                    }, 500);
-                });
+        // Filter services based on selected filters
+        function filterServices() {
+            // Implementation of filtering logic
+            console.log('Filtering services...');
+        }
 
-                filterSearch.addEventListener('input', function() {
-                    searchInput.value = this.value;
-                    activeFilters.search = this.value;
-                    currentPage = 1;
-                    applyFilters();
-                    updateUrlParams();
-                });
+        // View service details
+        window.viewService = function(serviceId) {
+            window.location.href = `/service-details.html?id=${serviceId}`;
+        };
 
-                // City select
-                citySelect.addEventListener('change', function() {
-                    activeFilters.city = this.value;
-                    currentPage = 1;
-                    applyFilters();
-                    updateUrlParams();
-                });
-
-                // Sort select
-                sortSelect.addEventListener('change', function() {
-                    activeFilters.sortBy = this.value;
-                    applyFilters();
-                    updateUrlParams();
-                });
-
-                // Rating filters
-                document.querySelectorAll('[id^="rating"]').forEach(cb => {
-                    cb.addEventListener('change', function() {
-                        if (this.checked) {
-                            activeFilters.ratings.push(this.value);
-                        } else {
-                            activeFilters.ratings = activeFilters.ratings.filter(r => r !== this.value);
-                        }
-                        currentPage = 1;
-                        applyFilters();
-                        updateUrlParams();
-                    });
-                });
-
-                // Price range
-                minPrice.addEventListener('change', function() {
-                    activeFilters.minPrice = this.value ? parseInt(this.value) : null;
-                    currentPage = 1;
-                    applyFilters();
-                    updateUrlParams();
-                });
-
-                maxPrice.addEventListener('change', function() {
-                    activeFilters.maxPrice = this.value ? parseInt(this.value) : null;
-                    currentPage = 1;
-                    applyFilters();
-                    updateUrlParams();
-                });
-
-                // Availability toggle
-                availableTodayToggle.addEventListener('click', function() {
-                    this.classList.toggle('active');
-                    activeFilters.availableToday = this.classList.contains('active');
-                    currentPage = 1;
-                    applyFilters();
-                    updateUrlParams();
-                });
-
-                // Verified only
-                verifiedCheckbox.addEventListener('change', function() {
-                    activeFilters.verifiedOnly = this.checked;
-                    currentPage = 1;
-                    applyFilters();
-                    updateUrlParams();
-                });
-
-                // Clear filters
-                clearFiltersBtn.addEventListener('click', clearAllFilters);
-
-                // Mobile filter toggle
-                mobileFilterToggle.addEventListener('click', function() {
-                    filtersSidebar.classList.add('show');
-                });
-
-                applyFiltersMobile.addEventListener('click', function() {
-                    filtersSidebar.classList.remove('show');
-                });
-
-                // Close filters when clicking outside
-                document.addEventListener('click', function(e) {
-                    if (filtersSidebar.classList.contains('show') && 
-                        !filtersSidebar.contains(e.target) && 
-                        !mobileFilterToggle.contains(e.target)) {
-                        filtersSidebar.classList.remove('show');
-                    }
-                });
+        // Book service
+        window.bookService = function(serviceId) {
+            // Check if user is logged in (implement your auth check)
+            const isLoggedIn = false; // Replace with actual auth check
+            
+            if (!isLoggedIn) {
+                Toast.show('Please login to book a service', 'warning');
+                window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.href)}`;
+                return;
             }
+            window.location.href = `/booking.html?service=${serviceId}`;
+        };
 
-            // ==================== URL PARAMS ====================
-            function checkUrlParams() {
-                const params = new URLSearchParams(window.location.search);
-                
-                // Search query
-                const q = params.get('q');
-                if (q) {
-                    activeFilters.search = q;
-                    searchInput.value = q;
-                    filterSearch.value = q;
-                }
-
-                // City
-                const city = params.get('city');
-                if (city) {
-                    activeFilters.city = city;
-                    citySelect.value = city;
-                }
-
-                // Category
-                const category = params.get('category');
-                if (category) {
-                    activeFilters.categories = [category];
-                }
-
-                applyFilters();
-            }
-
-            function updateUrlParams() {
-                const params = new URLSearchParams();
-                
-                if (activeFilters.search) params.set('q', activeFilters.search);
-                if (activeFilters.city) params.set('city', activeFilters.city);
-                
-                const url = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
-                window.history.replaceState({}, '', url);
-            }
-
-            // ==================== UTILITY FUNCTIONS ====================
-            window.changePage = function(page) {
-                if (page < 1 || page > totalPages || page === currentPage) return;
-                currentPage = page;
-                renderServices();
-                renderPagination();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            };
-
-            window.viewService = function(serviceId) {
-                window.location.href = `/service-details.html?id=${serviceId}`;
-            };
-
-            window.bookService = function(serviceId) {
-                if (!Auth.checkAuth()) {
-                    Toast.show('Please login to book a service', 'warning');
-                    window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.href)}`;
-                    return;
-                }
-                window.location.href = `/booking.html?service=${serviceId}`;
-            };
-
-            window.clearAllFilters = function() {
-                activeFilters = {
-                    search: '',
-                    city: '',
-                    categories: [],
-                    ratings: [],
-                    minPrice: null,
-                    maxPrice: null,
-                    availableToday: false,
-                    verifiedOnly: false,
-                    sortBy: 'recommended'
-                };
-
-                // Reset UI elements
-                searchInput.value = '';
-                filterSearch.value = '';
-                citySelect.value = '';
-                sortSelect.value = 'recommended';
-                minPrice.value = '';
-                maxPrice.value = '';
-                availableTodayToggle.classList.remove('active');
-                verifiedCheckbox.checked = false;
-
-                // Uncheck all checkboxes
-                document.querySelectorAll('.category-filter, [id^="rating"]').forEach(cb => {
-                    cb.checked = false;
-                });
-
-                currentPage = 1;
-                applyFilters();
-                updateUrlParams();
-            };
-
-            // Initialize
-            init();
-
-            // Load categories after services
-            setTimeout(() => {
-                if (allServices.length > 0) {
-                    renderCategoryFilters();
-                }
-            }, 500);
-        });
+        // Clear all filters
+        window.clearAllFilters = function() {
+            document.getElementById('servicesSearch').value = '';
+            document.getElementById('filterSearch').value = '';
+            document.getElementById('citySelect').value = '';
+            document.getElementById('sortBy').value = 'recommended';
+            document.getElementById('minPrice').value = '';
+            document.getElementById('maxPrice').value = '';
+            document.getElementById('availableToday').classList.remove('active');
+            document.getElementById('verifiedOnly').checked = false;
+            
+            document.querySelectorAll('.category-filter, [id^="rating"]').forEach(cb => {
+                cb.checked = false;
+            });
+            
+            loadServices();
+        };
 
         // Toggle filter sections
         window.toggleFilter = function(element) {
@@ -1658,6 +1382,89 @@
                 icon.style.transform = 'rotate(0)';
             }
         };
+
+        // ==================== EVENT LISTENERS ====================
+        // Search input with debounce
+        let searchTimeout;
+        document.getElementById('servicesSearch')?.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (this.value) {
+                    urlParams.set('q', this.value);
+                } else {
+                    urlParams.delete('q');
+                }
+                window.location.search = urlParams.toString();
+            }, 500);
+        });
+
+        // City select
+        document.getElementById('citySelect')?.addEventListener('change', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (this.value) {
+                urlParams.set('city', this.value);
+            } else {
+                urlParams.delete('city');
+            }
+            window.location.search = urlParams.toString();
+        });
+
+        // Clear filters button
+        document.getElementById('clearFilters')?.addEventListener('click', clearAllFilters);
+
+        // Mobile filter toggle
+        const mobileFilterToggle = document.getElementById('mobileFilterToggle');
+        const filtersSidebar = document.getElementById('filtersSidebar');
+        const applyFiltersMobile = document.getElementById('applyFiltersMobile');
+
+        if (mobileFilterToggle) {
+            mobileFilterToggle.addEventListener('click', function() {
+                filtersSidebar.classList.add('show');
+            });
+        }
+
+        if (applyFiltersMobile) {
+            applyFiltersMobile.addEventListener('click', function() {
+                filtersSidebar.classList.remove('show');
+            });
+        }
+
+        // Close filters when clicking outside
+        document.addEventListener('click', function(e) {
+            if (filtersSidebar?.classList.contains('show') && 
+                !filtersSidebar.contains(e.target) && 
+                !mobileFilterToggle?.contains(e.target)) {
+                filtersSidebar.classList.remove('show');
+            }
+        });
+
+        // Availability toggle
+        const availableToday = document.getElementById('availableToday');
+        if (availableToday) {
+            availableToday.addEventListener('click', function() {
+                this.classList.toggle('active');
+                filterServices();
+            });
+        }
+
+        // Verified only checkbox
+        document.getElementById('verifiedOnly')?.addEventListener('change', filterServices);
+
+        // Sort select
+        document.getElementById('sortBy')?.addEventListener('change', function() {
+            // Implement sorting logic
+            console.log('Sort by:', this.value);
+        });
+
+        // Price range inputs
+        document.getElementById('minPrice')?.addEventListener('change', filterServices);
+        document.getElementById('maxPrice')?.addEventListener('change', filterServices);
+
+        // Rating filters
+        document.querySelectorAll('[id^="rating"]')?.forEach(cb => {
+            cb.addEventListener('change', filterServices);
+        });
     </script>
 </body>
 </html>
