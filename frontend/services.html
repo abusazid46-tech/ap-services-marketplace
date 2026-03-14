@@ -1076,551 +1076,97 @@
             </div>
         </div>
     </footer>
-      <!-- Toast Container -->
+         <!-- Toast Container -->
     <div id="toast" class="toast"></div>
 
-    <!-- Load app.js FIRST - this contains the REAL ServicesAPI -->
+    <!-- Load app.js FIRST -->
     <script src="app.js"></script>
     
     <script>
-        // ==================== TOAST NOTIFICATION SYSTEM ====================
-        const Toast = {
-            element: document.getElementById('toast'),
-            timeout: null,
-            
-            show(message, type = 'info', duration = 3000) {
-                if (this.timeout) {
-                    clearTimeout(this.timeout);
-                }
-                
-                this.element.className = `toast ${type} show`;
-                this.element.innerHTML = `<i class="fas ${this.getIcon(type)}"></i> ${message}`;
-                
-                this.timeout = setTimeout(() => {
-                    this.element.classList.remove('show');
-                }, duration);
-            },
-            
-            getIcon(type) {
-                const icons = {
-                    success: 'fa-check-circle',
-                    error: 'fa-exclamation-circle',
-                    warning: 'fa-exclamation-triangle',
-                    info: 'fa-info-circle'
-                };
-                return icons[type] || icons.info;
-            }
-        };
-
-        // ==================== SERVICES PAGE JAVASCRIPT ====================
-        let allServices = [];
-        let filteredServices = [];
-        let currentPage = 1;
-        const itemsPerPage = 9;
-
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('✅ Services page loaded');
-            console.log('🔍 ServicesAPI available:', typeof ServicesAPI !== 'undefined');
-            loadServices();
-            setupEventListeners();
-        });
-
-        // Main function to load services from REAL API
-        async function loadServices() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const category = urlParams.get('category');
-            const search = urlParams.get('q');
-            
-            console.log('📥 Loading services with filters:', { category, search });
+        // ==================== SIMPLE SERVICES PAGE ====================
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('📄 Services page loaded');
             
             try {
-                showSkeleton();
-                
-                // Check if ServicesAPI is available
+                // Check if ServicesAPI exists
                 if (typeof ServicesAPI === 'undefined') {
-                    console.error('❌ ServicesAPI not found - app.js may not be loaded');
-                    Toast.show('API connection error', 'error');
+                    console.error('❌ ServicesAPI not found! app.js may not be loaded');
+                    document.getElementById('servicesGrid').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Error Loading Services</h3>
+                            <p>app.js not loaded properly</p>
+                        </div>
+                    `;
                     return;
                 }
                 
-                // Use the REAL ServicesAPI from app.js
-                const response = await ServicesAPI.getAll(category, search);
-                console.log('✅ API Response:', response);
-                
-                if (response && response.data) {
-                    allServices = response.data;
-                    console.log(`📊 Loaded ${allServices.length} services from API`);
-                } else {
-                    console.warn('⚠️ No data in response, using empty array');
-                    allServices = [];
-                }
-                
-                applyFilters();
-                initializeCategoryFilters();
-                
-                // Update UI with search params
-                if (category) {
-                    document.getElementById('servicesSearch').value = category;
-                    document.getElementById('filterSearch').value = category;
-                }
-                if (search) {
-                    document.getElementById('servicesSearch').value = search;
-                    document.getElementById('filterSearch').value = search;
-                }
-            } catch (error) {
-                console.error('❌ Failed to load services:', error);
-                Toast.show('Failed to load services: ' + error.message, 'error');
-                
-                // Fallback to mock data if API fails
-                console.warn('⚠️ Using mock data as fallback');
-                allServices = generateMockServices();
-                applyFilters();
-                initializeCategoryFilters();
-            }
-        }
-
-        // Fallback mock data generator (only used if API fails)
-        function generateMockServices() {
-            const categories = [
-                'Plumbing', 'Electrical', 'Painting', 'Cleaning', 
-                'Carpentry', 'Beauty', 'AC Repair', 'Tutoring',
-                'Home Nurse', 'Security', 'Yoga', 'Photography'
-            ];
-            
-            const services = [];
-            
-            for (let i = 1; i <= 12; i++) {
-                const category = categories[Math.floor(Math.random() * categories.length)];
-                const rating = (3.5 + Math.random() * 1.5).toFixed(1);
-                const bookings = Math.floor(Math.random() * 500) + 50;
-                const price = Math.floor(Math.random() * 800) + 199;
-                
-                services.push({
-                    id: i,
-                    name: `${category} Service`,
-                    category: category,
-                    description: `Professional ${category.toLowerCase()} service.`,
-                    rating: parseFloat(rating),
-                    total_bookings: bookings,
-                    base_price: price,
-                    image: `https://source.unsplash.com/300x200/?${category.toLowerCase()}`,
-                    provider_name: `Provider ${i}`,
-                    provider_initial: `P${i}`,
-                    availableToday: Math.random() > 0.3,
-                    verified: Math.random() > 0.2,
-                    city: ['Mumbai', 'Delhi', 'Bangalore'][Math.floor(Math.random() * 3)]
-                });
-            }
-            return services;
-        }
-
-        // Apply all filters and sorting
-        function applyFilters() {
-            console.log('🔍 Applying filters...');
-            filteredServices = [...allServices];
-            
-            // Get filter values
-            const searchTerm = document.getElementById('filterSearch')?.value.toLowerCase() || '';
-            const city = document.getElementById('citySelect')?.value || '';
-            const minPrice = parseFloat(document.getElementById('minPrice')?.value) || 0;
-            const maxPrice = parseFloat(document.getElementById('maxPrice')?.value) || Infinity;
-            const availableToday = document.getElementById('availableToday')?.classList.contains('active') || false;
-            const verifiedOnly = document.getElementById('verifiedOnly')?.checked || false;
-            
-            // Get selected categories
-            const selectedCategories = [];
-            document.querySelectorAll('.category-filter:checked').forEach(cb => {
-                selectedCategories.push(cb.value);
-            });
-            
-            // Get selected ratings
-            const selectedRatings = [];
-            document.querySelectorAll('[id^="rating"]:checked').forEach(cb => {
-                selectedRatings.push(parseInt(cb.value));
-            });
-            
-            // Apply search filter
-            if (searchTerm) {
-                filteredServices = filteredServices.filter(service => 
-                    service.name?.toLowerCase().includes(searchTerm) ||
-                    service.category?.toLowerCase().includes(searchTerm) ||
-                    service.description?.toLowerCase().includes(searchTerm)
-                );
-            }
-            
-            // Apply city filter
-            if (city) {
-                filteredServices = filteredServices.filter(service => 
-                    service.city === city
-                );
-            }
-            
-            // Apply category filter
-            if (selectedCategories.length > 0) {
-                filteredServices = filteredServices.filter(service => 
-                    selectedCategories.includes(service.category)
-                );
-            }
-            
-            // Apply rating filter
-            if (selectedRatings.length > 0) {
-                const maxRating = Math.max(...selectedRatings);
-                filteredServices = filteredServices.filter(service => 
-                    service.rating >= maxRating
-                );
-            }
-            
-            // Apply price filter
-            filteredServices = filteredServices.filter(service => {
-                const price = service.base_price || service.price || 0;
-                return price >= minPrice && price <= maxPrice;
-            });
-            
-            // Apply availability filter
-            if (availableToday) {
-                filteredServices = filteredServices.filter(service => service.availableToday);
-            }
-            
-            // Apply verified filter
-            if (verifiedOnly) {
-                filteredServices = filteredServices.filter(service => service.verified);
-            }
-            
-            // Apply sorting
-            const sortBy = document.getElementById('sortBy')?.value || 'recommended';
-            sortServices(sortBy);
-            
-            // Update UI
-            updateResultsCount();
-            renderServices();
-            renderPagination();
-        }
-
-        // Sort services
-        function sortServices(sortBy) {
-            switch(sortBy) {
-                case 'price_low':
-                    filteredServices.sort((a, b) => (a.base_price || a.price || 0) - (b.base_price || b.price || 0));
-                    break;
-                case 'price_high':
-                    filteredServices.sort((a, b) => (b.base_price || b.price || 0) - (a.base_price || a.price || 0));
-                    break;
-                case 'rating':
-                    filteredServices.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-                    break;
-                case 'popular':
-                    filteredServices.sort((a, b) => (b.total_bookings || 0) - (a.total_bookings || 0));
-                    break;
-                default:
-                    // Recommended - mix of rating and popularity
-                    filteredServices.sort((a, b) => {
-                        const scoreA = (a.rating || 0) * 0.7 + (a.total_bookings || 0) * 0.3;
-                        const scoreB = (b.rating || 0) * 0.7 + (b.total_bookings || 0) * 0.3;
-                        return scoreB - scoreA;
-                    });
-            }
-        }
-
-        // Display services in the grid
-        function renderServices() {
-            const servicesGrid = document.getElementById('servicesGrid');
-            
-            if (!filteredServices || filteredServices.length === 0) {
-                servicesGrid.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-search"></i>
-                        <h3>No services found</h3>
-                        <p>Try adjusting your search or filters</p>
-                        <button class="btn-primary" onclick="clearAllFilters()">
-                            Clear All Filters
-                        </button>
+                // Show loading
+                document.getElementById('servicesGrid').innerHTML = `
+                    <div class="skeleton-grid">
+                        ${Array(6).fill(0).map(() => `
+                            <div class="skeleton-card">
+                                <div class="skeleton-image"></div>
+                                <div class="skeleton-line short"></div>
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line"></div>
+                            </div>
+                        `).join('')}
                     </div>
                 `;
-                return;
-            }
-            
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const pageServices = filteredServices.slice(start, end);
-            
-            servicesGrid.innerHTML = pageServices.map(service => `
-                <div class="service-card" onclick="viewService(${service.id})">
-                    ${service.availableToday ? '<div class="service-badge">Available Today</div>' : ''}
-                    <div class="service-image">
-                        <img src="${service.image || 'https://via.placeholder.com/300x200'}" alt="${service.name}">
-                    </div>
-                    <div class="service-content">
-                        <div class="service-category">${service.category || 'General'}</div>
-                        <h3>${service.name || 'Service'}</h3>
-                        <p class="service-description">${service.description || 'Professional service'}</p>
-                        
-                        <div class="service-meta">
-                            <span class="service-rating">
-                                <i class="fas fa-star"></i> ${service.rating ? service.rating.toFixed(1) : 'New'}
-                            </span>
-                            <span class="service-bookings">
-                                <i class="fas fa-users"></i> ${service.total_bookings || 0}+ bookings
-                            </span>
-                        </div>
-                        
-                        <div class="service-price">
-                            <span class="current-price">₹${service.base_price || service.price || 0}</span>
-                            <span class="price-unit">/hour</span>
-                        </div>
-                        
-                        <div class="service-footer">
-                            <div class="provider-info">
-                                <div class="provider-avatar">${service.provider_initial || 'P'}</div>
-                                <span class="provider-name">${service.provider_name || 'Professional'}</span>
-                                ${service.verified ? '<i class="fas fa-check-circle" style="color: var(--success);" title="Verified"></i>' : ''}
-                            </div>
-                            <button class="book-btn" onclick="event.stopPropagation(); bookService(${service.id})">
-                                Book Now
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Update results count
-        function updateResultsCount() {
-            document.getElementById('totalCount').textContent = filteredServices.length;
-        }
-
-        // Render pagination
-        function renderPagination() {
-            const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
-            const pagination = document.getElementById('pagination');
-            
-            if (totalPages <= 1) {
-                pagination.innerHTML = '';
-                return;
-            }
-            
-            let html = '';
-            
-            // Previous button
-            html += `<button class="pagination-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
-                <i class="fas fa-chevron-left"></i>
-            </button>`;
-            
-            // Page numbers
-            for (let i = 1; i <= totalPages; i++) {
-                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
-                    html += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
-                } else if (i === currentPage - 3 || i === currentPage + 3) {
-                    html += `<span class="pagination-btn disabled">...</span>`;
-                }
-            }
-            
-            // Next button
-            html += `<button class="pagination-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
-                <i class="fas fa-chevron-right"></i>
-            </button>`;
-            
-            pagination.innerHTML = html;
-        }
-
-        // Change page
-        window.changePage = function(page) {
-            if (page < 1 || page > Math.ceil(filteredServices.length / itemsPerPage)) return;
-            currentPage = page;
-            renderServices();
-            renderPagination();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-
-        // Show loading skeleton
-        function showSkeleton() {
-            const servicesGrid = document.getElementById('servicesGrid');
-            servicesGrid.innerHTML = `
-                <div class="skeleton-grid">
-                    ${Array(6).fill(0).map(() => `
-                        <div class="skeleton-card">
-                            <div class="skeleton-image"></div>
-                            <div class="skeleton-line short"></div>
-                            <div class="skeleton-line"></div>
-                            <div class="skeleton-line"></div>
-                            <div class="skeleton-line short"></div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        // Initialize category filters from data
-        function initializeCategoryFilters() {
-            if (!allServices || allServices.length === 0) return;
-            
-            const categories = [...new Set(allServices.map(s => s.category))];
-            const container = document.getElementById('categoryFilters');
-            
-            if (container && categories.length > 0) {
-                container.innerHTML = categories.map(category => {
-                    const count = allServices.filter(s => s.category === category).length;
-                    const id = `cat_${category.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                    return `
-                        <div class="filter-option">
-                            <input type="checkbox" class="category-filter" 
-                                   value="${category}" id="${id}">
-                            <label for="${id}">${category}</label>
-                            <span class="count">${count}</span>
+                
+                // Fetch services
+                console.log('🔍 Fetching services...');
+                const response = await ServicesAPI.getAll();
+                console.log('✅ Services response:', response);
+                
+                const services = response.data || [];
+                document.getElementById('totalCount').textContent = services.length;
+                
+                if (services.length === 0) {
+                    document.getElementById('servicesGrid').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-search"></i>
+                            <h3>No services found</h3>
+                            <p>Check back later</p>
                         </div>
                     `;
-                }).join('');
-
-                // Add event listeners
-                document.querySelectorAll('.category-filter').forEach(cb => {
-                    cb.addEventListener('change', applyFilters);
-                });
-            }
-        }
-
-        // View service details
-        window.viewService = function(serviceId) {
-            window.location.href = `/service-details.html?id=${serviceId}`;
-        };
-
-        // Book service
-        window.bookService = function(serviceId) {
-            const user = typeof Auth !== 'undefined' ? Auth.getUser() : null;
-            
-            if (!user) {
-                Toast.show('Please login to book a service', 'warning');
-                window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.href)}`;
-                return;
-            }
-            window.location.href = `/booking.html?service=${serviceId}`;
-        };
-
-        // Clear all filters
-        window.clearAllFilters = function() {
-            document.getElementById('servicesSearch').value = '';
-            document.getElementById('filterSearch').value = '';
-            document.getElementById('citySelect').value = '';
-            document.getElementById('sortBy').value = 'recommended';
-            document.getElementById('minPrice').value = '';
-            document.getElementById('maxPrice').value = '';
-            document.getElementById('availableToday').classList.remove('active');
-            document.getElementById('verifiedOnly').checked = false;
-            
-            document.querySelectorAll('.category-filter, [id^="rating"]').forEach(cb => {
-                cb.checked = false;
-            });
-            
-            // Reset URL params
-            const url = new URL(window.location);
-            url.searchParams.delete('category');
-            url.searchParams.delete('q');
-            window.history.replaceState({}, '', url);
-            
-            loadServices();
-        };
-
-        // Toggle filter sections
-        window.toggleFilter = function(element) {
-            const options = element.nextElementSibling;
-            const icon = element.querySelector('i:last-child');
-            
-            if (options) {
-                options.classList.toggle('collapsed');
-                element.classList.toggle('collapsed');
+                    return;
+                }
                 
-                if (options.classList.contains('collapsed')) {
-                    icon.style.transform = 'rotate(-90deg)';
-                } else {
-                    icon.style.transform = 'rotate(0)';
-                }
+                // Display services
+                document.getElementById('servicesGrid').innerHTML = services.map(service => `
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="https://via.placeholder.com/300x200" alt="${service.name}">
+                        </div>
+                        <div class="service-content">
+                            <div class="service-category">${service.category || 'General'}</div>
+                            <h3>${service.name}</h3>
+                            <p class="service-description">${service.description || 'Professional service'}</p>
+                            <div class="service-price">
+                                <span class="current-price">₹${service.base_price || 0}</span>
+                                <span class="price-unit">/hour</span>
+                            </div>
+                            <button class="book-btn" style="width:100%">View Details</button>
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('❌ Failed to load services:', error);
+                document.getElementById('servicesGrid').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error Loading Services</h3>
+                        <p>${error.message}</p>
+                        <button class="btn-primary" onclick="location.reload()">Retry</button>
+                    </div>
+                `;
             }
-        };
-
-        // Setup all event listeners
-        function setupEventListeners() {
-            // Search input with debounce
-            let searchTimeout;
-            document.getElementById('servicesSearch')?.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    document.getElementById('filterSearch').value = this.value;
-                    applyFilters();
-                    
-                    // Update URL
-                    const url = new URL(window.location);
-                    if (this.value) {
-                        url.searchParams.set('q', this.value);
-                    } else {
-                        url.searchParams.delete('q');
-                    }
-                    window.history.replaceState({}, '', url);
-                }, 500);
-            });
-
-            document.getElementById('filterSearch')?.addEventListener('input', function() {
-                document.getElementById('servicesSearch').value = this.value;
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(applyFilters, 500);
-            });
-
-            // City select
-            document.getElementById('citySelect')?.addEventListener('change', applyFilters);
-
-            // Sort select
-            document.getElementById('sortBy')?.addEventListener('change', function() {
-                applyFilters();
-            });
-
-            // Price range inputs
-            document.getElementById('minPrice')?.addEventListener('change', applyFilters);
-            document.getElementById('maxPrice')?.addEventListener('change', applyFilters);
-
-            // Rating filters
-            document.querySelectorAll('[id^="rating"]')?.forEach(cb => {
-                cb.addEventListener('change', applyFilters);
-            });
-
-            // Availability toggle
-            const availableToday = document.getElementById('availableToday');
-            if (availableToday) {
-                availableToday.addEventListener('click', function() {
-                    this.classList.toggle('active');
-                    applyFilters();
-                });
-            }
-
-            // Verified only checkbox
-            document.getElementById('verifiedOnly')?.addEventListener('change', applyFilters);
-
-            // Clear filters button
-            document.getElementById('clearFilters')?.addEventListener('click', clearAllFilters);
-
-            // Mobile filter toggle
-            const mobileFilterToggle = document.getElementById('mobileFilterToggle');
-            const filtersSidebar = document.getElementById('filtersSidebar');
-            const applyFiltersMobile = document.getElementById('applyFiltersMobile');
-
-            if (mobileFilterToggle) {
-                mobileFilterToggle.addEventListener('click', function() {
-                    filtersSidebar.classList.add('show');
-                });
-            }
-
-            if (applyFiltersMobile) {
-                applyFiltersMobile.addEventListener('click', function() {
-                    filtersSidebar.classList.remove('show');
-                    applyFilters();
-                });
-            }
-
-            // Close filters when clicking outside
-            document.addEventListener('click', function(e) {
-                if (filtersSidebar?.classList.contains('show') && 
-                    !filtersSidebar.contains(e.target) && 
-                    !mobileFilterToggle?.contains(e.target)) {
-                    filtersSidebar.classList.remove('show');
-                }
-            });
-        }
+        });
     </script>
+</body>
+</html>
 </body>
 </html>
