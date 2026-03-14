@@ -1685,6 +1685,38 @@
     
     <script>
         // ==================== ADMIN DASHBOARD JAVASCRIPT ====================
+        // Add this to your admin-dashboard.html script section
+async function loadDashboardStats() {
+    try {
+        const response = await API.get('/admin/dashboard/stats');
+        if (response.success) {
+            const stats = response.data.stats;
+            
+            // Update stats cards
+            document.getElementById('totalUsers').textContent = stats.total_users || 0;
+            document.getElementById('totalWorkers').textContent = stats.total_workers || 0;
+            document.getElementById('totalBookings').textContent = stats.total_bookings || 0;
+            document.getElementById('totalRevenue').textContent = '₹' + (stats.total_revenue || 0).toLocaleString();
+            document.getElementById('pendingWorkers').textContent = stats.pending_workers || 0;
+            document.getElementById('pendingBookings').textContent = stats.pending_bookings || 0;
+            
+            // Update recent activity
+            updateRecentActivity(response.data.recentActivity);
+        }
+    } catch (error) {
+        console.error('Failed to load dashboard stats:', error);
+        Toast.show('Failed to load dashboard data', 'error');
+    }
+}
+
+// Call this when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    loadDashboardStats();
+    loadUsers();
+    loadWorkers();
+    loadServices();
+});
+        
         document.addEventListener('DOMContentLoaded', function() {
             // Check authentication and admin role
             if (!Auth.checkAuth()) {
