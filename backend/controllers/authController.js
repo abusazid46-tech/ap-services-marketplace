@@ -1,6 +1,7 @@
 // backend/controllers/authController.js
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs'); // ADD THIS!
 
 // Generate JWT Token
 const generateToken = (userId, role) => {
@@ -37,11 +38,15 @@ exports.register = async (req, res) => {
             });
         }
         
-        // Create user
+        // Hash password before creating user
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        
+        // Create user with hashed password
         const newUser = await User.create({
             email,
             phone,
-            password,
+            password: hashedPassword, // Send hashed password
             first_name,
             last_name
         });
@@ -83,6 +88,7 @@ exports.login = async (req, res) => {
         const user = await User.findByEmail(email);
         
         if (!user) {
+            console.log('❌ User not found:', email);
             return res.status(401).json({
                 success: false,
                 message: 'Invalid email or password'
@@ -97,18 +103,17 @@ exports.login = async (req, res) => {
             });
         }
         
-        // Verify password
-        const isValidPassword = await User.verifyPassword(user, password);
+        // Verify password using bcrypt directly
+        const isValidPassword = await bcrypt.compare(password, user.password_hash);
+        console.log('🔑 Password valid:', isValidPassword);
         
         if (!isValidPassword) {
+            console.log('❌ Invalid password for:', email);
             return res.status(401).json({
                 success: false,
                 message: 'Invalid email or password'
             });
         }
-        
-        // Update last login
-        await User.updateLastLogin(user.id);
         
         // Generate token
         const token = generateToken(user.id, user.role);
