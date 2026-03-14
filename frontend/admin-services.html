@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Manage Services | AP Services</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">[navbar content]</nav>
+    
+    <div class="container">
+        <h1>Manage Services</h1>
+        
+        <button onclick="showAddServiceModal()" class="btn-primary">
+            <i class="fas fa-plus"></i> Add New Service
+        </button>
+        
+        <div id="servicesList" class="services-grid"></div>
+    </div>
+    
+    <!-- Add/Edit Service Modal -->
+    <div id="serviceModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Add Service</h3>
+            <form id="serviceForm">
+                <input type="hidden" id="serviceId">
+                <div class="form-group">
+                    <label>Service Name</label>
+                    <input type="text" id="serviceName" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <input type="text" id="serviceCategory" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="serviceDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Icon (Font Awesome class)</label>
+                    <input type="text" id="serviceIcon" placeholder="e.g., wrench">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Base Price (₹)</label>
+                        <input type="number" id="servicePrice" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Price Type</label>
+                        <select id="servicePriceType">
+                            <option value="hourly">Hourly</option>
+                            <option value="fixed">Fixed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal()" class="btn-outline">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Service</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+    <script>
+        async function loadServices() {
+            try {
+                const response = await AdminAPI.getServices();
+                displayServices(response.data);
+            } catch (error) {
+                Toast.show('Failed to load services', 'error');
+            }
+        }
+        
+        function displayServices(services) {
+            const container = document.getElementById('servicesList');
+            container.innerHTML = services.map(service => `
+                <div class="service-card ${service.is_active ? '' : 'inactive'}">
+                    <div class="service-icon"><i class="fas fa-${service.icon || 'tools'}"></i></div>
+                    <h3>${service.name}</h3>
+                    <p>${service.category}</p>
+                    <p class="price">₹${service.base_price}/${service.price_type}</p>
+                    <div class="card-actions">
+                        <button onclick="editService('${service.id}')" class="btn-small">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button onclick="deleteService('${service.id}')" class="btn-small btn-danger">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        document.getElementById('serviceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const serviceData = {
+                name: document.getElementById('serviceName').value,
+                category: document.getElementById('serviceCategory').value,
+                description: document.getElementById('serviceDescription').value,
+                icon: document.getElementById('serviceIcon').value,
+                base_price: parseFloat(document.getElementById('servicePrice').value),
+                price_type: document.getElementById('servicePriceType').value
+            };
+            
+            const serviceId = document.getElementById('serviceId').value;
+            
+            try {
+                if (serviceId) {
+                    await AdminAPI.updateService(serviceId, serviceData);
+                    Toast.show('Service updated successfully', 'success');
+                } else {
+                    await AdminAPI.createService(serviceData);
+                    Toast.show('Service created successfully', 'success');
+                }
+                closeModal();
+                loadServices();
+            } catch (error) {
+                Toast.show('Operation failed', 'error');
+            }
+        });
+        
+        function showAddServiceModal() {
+            document.getElementById('modalTitle').textContent = 'Add New Service';
+            document.getElementById('serviceForm').reset();
+            document.getElementById('serviceId').value = '';
+            document.getElementById('serviceModal').classList.add('show');
+        }
+        
+        async function editService(serviceId) {
+            try {
+                const response = await ServicesAPI.getById(serviceId);
+                const service = response.data;
+                
+                document.getElementById('modalTitle').textContent = 'Edit Service';
+                document.getElementById('serviceId').value = service.id;
+                document.getElementById('serviceName').value = service.name;
+                document.getElementById('serviceCategory').value = service.category;
+                document.getElementById('serviceDescription').value = service.description || '';
+                document.getElementById('serviceIcon').value = service.icon || '';
+                document.getElementById('servicePrice').value = service.base_price;
+                document.getElementById('servicePriceType').value = service.price_type;
+                
+                document.getElementById('serviceModal').classList.add('show');
+            } catch (error) {
+                Toast.show('Failed to load service details', 'error');
+            }
+        }
+        
+        async function deleteService(serviceId) {
+            if (!confirm('Are you sure you want to delete this service?')) return;
+            
+            try {
+                await AdminAPI.deleteService(serviceId);
+                Toast.show('Service deleted successfully', 'success');
+                loadServices();
+            } catch (error) {
+                Toast.show('Failed to delete service', 'error');
+            }
+        }
+        
+        function closeModal() {
+            document.getElementById('serviceModal').classList.remove('show');
+        }
+        
+        document.addEventListener('DOMContentLoaded', loadServices);
+    </script>
+</body>
+</html>
