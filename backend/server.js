@@ -11,6 +11,7 @@ const serviceRoutes = require('./routes/services');
 const db = require('./config/database');
 const bookingRoutes = require('./routes/bookings');
 const reviewRoutes = require('./routes/reviews');
+const adminRoutes = require('./routes/admin');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -36,6 +37,7 @@ app.use('/api/workers', workerRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Test route
 app.get('/', (req, res) => {
