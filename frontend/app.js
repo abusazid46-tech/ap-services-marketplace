@@ -4,7 +4,7 @@
 // ==================== CONFIGURATION ====================
 const CONFIG = {
     API_URL: 'https://ap-services-marketplace.onrender.com/api',
-    FRONTEND_URL: 'https://ap-services-xi.vercel.app'
+    FRONTEND_URL: 'https://ap-services-marketplace.vercel.app'
 };
 
 // ==================== STATE MANAGEMENT ====================
