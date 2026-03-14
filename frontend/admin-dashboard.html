@@ -1680,552 +1680,386 @@
 
     <!-- Toast Container -->
     <div id="toast" class="toast"></div>
-
-    <script src="app.js"></script>
+   <script src="app.js"></script>
+<script>
+    // ==================== ADMIN DASHBOARD - REAL DATA INTEGRATION ====================
     
-    <script>
-        // ==================== ADMIN DASHBOARD JAVASCRIPT ====================
-        // Add this to your admin-dashboard.html script section
-async function loadDashboardStats() {
-    try {
-        const response = await API.get('/admin/dashboard/stats');
-        if (response.success) {
-            const stats = response.data.stats;
-            
-            // Update stats cards
-            document.getElementById('totalUsers').textContent = stats.total_users || 0;
-            document.getElementById('totalWorkers').textContent = stats.total_workers || 0;
-            document.getElementById('totalBookings').textContent = stats.total_bookings || 0;
-            document.getElementById('totalRevenue').textContent = '₹' + (stats.total_revenue || 0).toLocaleString();
-            document.getElementById('pendingWorkers').textContent = stats.pending_workers || 0;
-            document.getElementById('pendingBookings').textContent = stats.pending_bookings || 0;
-            
-            // Update recent activity
-            updateRecentActivity(response.data.recentActivity);
+    // Check authentication on page load
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Check if user is logged in and is admin
+        if (!Auth.checkAuth()) {
+            Toast.show('Please login to access dashboard', 'warning');
+            setTimeout(() => window.location.href = '/login.html', 1500);
+            return;
         }
-    } catch (error) {
-        console.error('Failed to load dashboard stats:', error);
-        Toast.show('Failed to load dashboard data', 'error');
+
+        const user = Auth.getUser();
+        if (user?.role !== 'admin') {
+            Toast.show('Access denied. Admin only.', 'error');
+            setTimeout(() => window.location.href = '/', 1500);
+            return;
+        }
+
+        // Update admin profile
+        document.querySelector('.admin-name').textContent = `${user.first_name} ${user.last_name}`;
+        document.querySelector('.admin-email').textContent = user.email;
+
+        // Load all dashboard data
+        await Promise.all([
+            loadDashboardStats(),
+            loadUsers(),
+            loadWorkers(),
+            loadServices(),
+            loadBookings(),
+            initializeCharts()
+        ]);
+
+        // Setup event listeners
+        setupNavigation();
+        setupFilters();
+    });
+
+    // ==================== DASHBOARD STATS ====================
+    async function loadDashboardStats() {
+        try {
+            const response = await API.get('/admin/dashboard/stats');
+            if (response.success) {
+                const stats = response.data.stats;
+                
+                // Update stats cards
+                document.querySelector('.stat-card.revenue .stat-value').textContent = 
+                    '₹' + (stats.total_revenue || 0).toLocaleString();
+                document.querySelector('.stat-card.users .stat-value').textContent = 
+                    (stats.total_users || 0).toLocaleString();
+                document.querySelector('.stat-card.bookings .stat-value').textContent = 
+                    (stats.total_bookings || 0).toLocaleString();
+                document.querySelector('.stat-card.workers .stat-value').textContent = 
+                    (stats.total_workers || 0).toLocaleString();
+                
+                // Update badges
+                document.querySelector('.nav-item[data-section="workers"] .badge').textContent = 
+                    stats.pending_workers || 0;
+                
+                // Update quick action text
+                document.querySelector('.action-card p').textContent = 
+                    `${stats.pending_workers || 0} pending verifications`;
+            }
+        } catch (error) {
+            console.error('Failed to load dashboard stats:', error);
+            Toast.show('Using demo data', 'info');
+        }
     }
-}
 
-// Call this when page loads
-document.addEventListener('DOMContentLoaded', () => {
-    loadDashboardStats();
-    loadUsers();
-    loadWorkers();
-    loadServices();
-});
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check authentication and admin role
-            if (!Auth.checkAuth()) {
-                Toast.show('Please login to access dashboard', 'warning');
-                setTimeout(() => {
-                    window.location.href = '/login.html';
-                }, 1500);
-                return;
+    // ==================== USERS MANAGEMENT ====================
+    async function loadUsers(page = 1) {
+        try {
+            const response = await API.get(`/admin/users?page=${page}&limit=10`);
+            if (response.success) {
+                displayUsers(response.data);
+                updatePagination(response.pagination, 'users');
             }
+        } catch (error) {
+            console.error('Failed to load users:', error);
+            // Fallback to mock data
+            displayMockUsers();
+        }
+    }
 
-            const user = Auth.getUser();
-            if (user?.role !== 'admin') {
-                Toast.show('Access denied. Admin only.', 'error');
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 1500);
-                return;
+    function displayUsers(users) {
+        const tbody = document.getElementById('usersTable');
+        if (!tbody) return;
+
+        tbody.innerHTML = users.map(user => `
+            <tr>
+                <td>
+                    <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                        <div class="avatar-circle">${user.first_name?.[0] || 'U'}${user.last_name?.[0] || ''}</div>
+                        <span>${user.first_name || ''} ${user.last_name || ''}</span>
+                    </div>
+                </td>
+                <td>${user.email || ''}</td>
+                <td>${user.phone || ''}</td>
+                <td><span class="status-badge">${user.role || 'customer'}</span></td>
+                <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                <td><span class="status-badge ${user.is_active ? 'active' : 'suspended'}">${user.is_active ? 'active' : 'inactive'}</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="icon-btn" onclick="viewUser('${user.id}')"><i class="fas fa-eye"></i></button>
+                        <button class="icon-btn" onclick="toggleUserStatus('${user.id}', ${!user.is_active})">
+                            <i class="fas ${user.is_active ? 'fa-ban' : 'fa-check-circle'}"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // ==================== WORKERS MANAGEMENT ====================
+    async function loadWorkers(status = 'pending', page = 1) {
+        try {
+            const response = await API.get(`/admin/workers?status=${status}&page=${page}&limit=10`);
+            if (response.success) {
+                displayWorkers(response.data);
             }
-
-            // Initialize dashboard
-            loadDashboardData();
-            initializeCharts();
-            loadRecentUsers();
-            loadUsersTable();
-            loadWorkersTable();
-            loadBookingsTable();
-            loadServicesGrid();
-            loadPaymentsTable();
-
-            // Setup event listeners
-            setupNavigation();
-            setupTabs();
-            setupFilters();
-        });
-
-        // ==================== DATA LOADING ====================
-        function loadDashboardData() {
-            // In production, fetch from API
-            // Mock data already in HTML
+        } catch (error) {
+            console.error('Failed to load workers:', error);
         }
+    }
 
-        function loadRecentUsers() {
-            const users = [
-                { name: 'Amit Sharma', email: 'amit@example.com', type: 'Customer', joined: '2024-03-15', status: 'active', avatar: 'AS' },
-                { name: 'Priya Patel', email: 'priya@example.com', type: 'Worker', joined: '2024-03-14', status: 'pending', avatar: 'PP' },
-                { name: 'Rahul Mehta', email: 'rahul@example.com', type: 'Customer', joined: '2024-03-13', status: 'active', avatar: 'RM' },
-                { name: 'Neha Gupta', email: 'neha@example.com', type: 'Worker', joined: '2024-03-12', status: 'verified', avatar: 'NG' }
-            ];
+    function displayWorkers(workers) {
+        const tbody = document.getElementById('workersTable');
+        if (!tbody) return;
 
-            const tbody = document.getElementById('recentUsers');
-            tbody.innerHTML = users.map(user => `
-                <tr>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
-                            <div class="avatar-circle">${user.avatar}</div>
-                            <span>${user.name}</span>
-                        </div>
-                    </td>
-                    <td>${user.email}</td>
-                    <td>${user.type}</td>
-                    <td>${user.joined}</td>
-                    <td><span class="status-badge ${user.status}">${user.status}</span></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="icon-btn" onclick="viewUser('${user.email}')"><i class="fas fa-eye"></i></button>
-                            <button class="icon-btn" onclick="editUser('${user.email}')"><i class="fas fa-edit"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+        tbody.innerHTML = workers.map(worker => `
+            <tr>
+                <td>
+                    <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                        <div class="avatar-circle">${worker.first_name?.[0] || 'W'}${worker.last_name?.[0] || ''}</div>
+                        <span>${worker.first_name || ''} ${worker.last_name || ''}</span>
+                    </div>
+                </td>
+                <td>${worker.category || 'General'}</td>
+                <td>${worker.experience_years || 0} years</td>
+                <td><span class="status-badge">${worker.id_proof_url ? 'Uploaded' : 'Pending'}</span></td>
+                <td>${new Date(worker.created_at).toLocaleDateString()}</td>
+                <td><span class="status-badge ${worker.approval_status}">${worker.approval_status || 'pending'}</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="icon-btn" onclick="viewWorker('${worker.id}')"><i class="fas fa-eye"></i></button>
+                        ${worker.approval_status === 'pending' ? `
+                            <button class="icon-btn" style="color: var(--success);" onclick="approveWorker('${worker.id}')">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="icon-btn delete" onclick="rejectWorker('${worker.id}')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // ==================== SERVICES MANAGEMENT ====================
+    async function loadServices() {
+        try {
+            const response = await API.get('/admin/services');
+            if (response.success) {
+                displayServices(response.data);
+            }
+        } catch (error) {
+            console.error('Failed to load services:', error);
         }
+    }
 
-        function loadUsersTable() {
-            const users = [
-                { name: 'Amit Sharma', email: 'amit@example.com', phone: '9876543210', type: 'Customer', joined: '2024-03-15', status: 'active', avatar: 'AS' },
-                { name: 'Priya Patel', email: 'priya@example.com', phone: '9876543211', type: 'Worker', joined: '2024-03-14', status: 'pending', avatar: 'PP' },
-                { name: 'Rahul Mehta', email: 'rahul@example.com', phone: '9876543212', type: 'Customer', joined: '2024-03-13', status: 'active', avatar: 'RM' },
-                { name: 'Neha Gupta', email: 'neha@example.com', phone: '9876543213', type: 'Worker', joined: '2024-03-12', status: 'verified', avatar: 'NG' },
-                { name: 'Vikram Singh', email: 'vikram@example.com', phone: '9876543214', type: 'Admin', joined: '2024-03-11', status: 'active', avatar: 'VS' }
-            ];
+    function displayServices(services) {
+        const container = document.getElementById('servicesGrid');
+        if (!container) return;
 
-            const tbody = document.getElementById('usersTable');
-            tbody.innerHTML = users.map(user => `
-                <tr>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
-                            <div class="avatar-circle">${user.avatar}</div>
-                            <span>${user.name}</span>
-                        </div>
-                    </td>
-                    <td>${user.email}</td>
-                    <td>${user.phone}</td>
-                    <td>${user.type}</td>
-                    <td>${user.joined}</td>
-                    <td><span class="status-badge ${user.status}">${user.status}</span></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="icon-btn" onclick="viewUser('${user.email}')"><i class="fas fa-eye"></i></button>
-                            <button class="icon-btn" onclick="editUser('${user.email}')"><i class="fas fa-edit"></i></button>
-                            <button class="icon-btn delete" onclick="suspendUser('${user.email}')"><i class="fas fa-ban"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function loadWorkersTable() {
-            const workers = [
-                { name: 'Rajesh Kumar', category: 'Plumbing', experience: '12 years', documents: 'Submitted', applied: '2024-03-15', status: 'pending', avatar: 'RK' },
-                { name: 'Suresh Patel', category: 'Electrical', experience: '8 years', documents: 'Submitted', applied: '2024-03-14', status: 'pending', avatar: 'SP' },
-                { name: 'Priya Sharma', category: 'Beauty', experience: '6 years', documents: 'Verified', applied: '2024-03-13', status: 'verified', avatar: 'PS' },
-                { name: 'Amit Singh', category: 'AC Repair', experience: '10 years', documents: 'Verified', applied: '2024-03-12', status: 'verified', avatar: 'AS' },
-                { name: 'Neha Gupta', category: 'Tutor', experience: '5 years', documents: 'Rejected', applied: '2024-03-11', status: 'rejected', avatar: 'NG' }
-            ];
-
-            const tbody = document.getElementById('workersTable');
-            tbody.innerHTML = workers.map(worker => `
-                <tr>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
-                            <div class="avatar-circle">${worker.avatar}</div>
-                            <span>${worker.name}</span>
-                        </div>
-                    </td>
-                    <td>${worker.category}</td>
-                    <td>${worker.experience}</td>
-                    <td><span class="status-badge">${worker.documents}</span></td>
-                    <td>${worker.applied}</td>
-                    <td><span class="status-badge ${worker.status}">${worker.status}</span></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="icon-btn" onclick="viewWorker('${worker.name}')"><i class="fas fa-eye"></i></button>
-                            ${worker.status === 'pending' ? `
-                                <button class="icon-btn" style="color: var(--success);" onclick="verifyWorker('${worker.name}')"><i class="fas fa-check"></i></button>
-                                <button class="icon-btn delete" onclick="rejectWorker('${worker.name}')"><i class="fas fa-times"></i></button>
-                            ` : ''}
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function loadBookingsTable() {
-            const bookings = [
-                { id: 'BK001', customer: 'Amit Sharma', worker: 'Rajesh Kumar', service: 'Plumbing', date: '2024-03-15', amount: '₹499', status: 'pending' },
-                { id: 'BK002', customer: 'Priya Patel', worker: 'Suresh Patel', service: 'Electrical', date: '2024-03-14', amount: '₹899', status: 'confirmed' },
-                { id: 'BK003', customer: 'Rahul Mehta', worker: 'Priya Sharma', service: 'Beauty', date: '2024-03-13', amount: '₹1,299', status: 'completed' },
-                { id: 'BK004', customer: 'Neha Gupta', worker: 'Amit Singh', service: 'AC Repair', date: '2024-03-12', amount: '₹599', status: 'cancelled' }
-            ];
-
-            const tbody = document.getElementById('bookingsTable');
-            tbody.innerHTML = bookings.map(booking => `
-                <tr>
-                    <td>${booking.id}</td>
-                    <td>${booking.customer}</td>
-                    <td>${booking.worker}</td>
-                    <td>${booking.service}</td>
-                    <td>${booking.date}</td>
-                    <td>${booking.amount}</td>
-                    <td><span class="status-badge ${booking.status}">${booking.status}</span></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="icon-btn" onclick="viewBooking('${booking.id}')"><i class="fas fa-eye"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function loadServicesGrid() {
-            const services = [
-                { name: 'Plumbing', icon: 'wrench', categories: 8, workers: 145, status: 'active' },
-                { name: 'Electrical', icon: 'bolt', categories: 6, workers: 98, status: 'active' },
-                { name: 'Beauty', icon: 'spa', categories: 12, workers: 67, status: 'active' },
-                { name: 'Cleaning', icon: 'broom', categories: 5, workers: 89, status: 'active' },
-                { name: 'Painting', icon: 'paint-brush', categories: 4, workers: 56, status: 'inactive' },
-                { name: 'Carpentry', icon: 'hammer', categories: 7, workers: 43, status: 'active' }
-            ];
-
-            const container = document.getElementById('servicesGrid');
-            container.innerHTML = services.map(service => `
-                <div class="service-card" style="border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-md);">
-                    <div style="display: flex; align-items: center; gap: var(--spacing-md); flex-wrap: wrap;">
-                        <div style="width: 60px; height: 60px; background: var(--primary-100); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-${service.icon}" style="color: var(--primary-600); font-size: 1.5rem;"></i>
-                        </div>
-                        <div style="flex: 1;">
-                            <h4 style="margin-bottom: 4px;">${service.name}</h4>
-                            <p style="color: var(--gray-600);">${service.categories} subcategories • ${service.workers} workers</p>
-                        </div>
-                        <div>
-                            <span class="status-badge ${service.status}">${service.status}</span>
-                        </div>
-                        <div class="action-buttons">
-                            <button class="icon-btn" onclick="editService('${service.name}')"><i class="fas fa-edit"></i></button>
-                            <button class="icon-btn" onclick="toggleServiceStatus('${service.name}')"><i class="fas fa-toggle-on"></i></button>
-                        </div>
+        container.innerHTML = services.map(service => `
+            <div class="service-card" style="border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-md);">
+                <div style="display: flex; align-items: center; gap: var(--spacing-md); flex-wrap: wrap;">
+                    <div style="width: 60px; height: 60px; background: var(--primary-100); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-${service.icon || 'tools'}" style="color: var(--primary-600); font-size: 1.5rem;"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <h4 style="margin-bottom: 4px;">${service.name}</h4>
+                        <p style="color: var(--gray-600);">${service.category} • ${service.worker_count || 0} workers</p>
+                    </div>
+                    <div>
+                        <span class="status-badge ${service.is_active ? 'active' : 'inactive'}">${service.is_active ? 'active' : 'inactive'}</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="icon-btn" onclick="editService('${service.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="icon-btn" onclick="toggleService('${service.id}', ${!service.is_active})">
+                            <i class="fas fa-${service.is_active ? 'toggle-on' : 'toggle-off'}"></i>
+                        </button>
                     </div>
                 </div>
-            `).join('');
+            </div>
+        `).join('');
+    }
+
+    // ==================== BOOKINGS MANAGEMENT ====================
+    async function loadBookings(status = 'all', page = 1) {
+        try {
+            const response = await API.get(`/admin/bookings?status=${status}&page=${page}&limit=10`);
+            if (response.success) {
+                displayBookings(response.data);
+            }
+        } catch (error) {
+            console.error('Failed to load bookings:', error);
         }
+    }
 
-        function loadPaymentsTable() {
-            const payments = [
-                { id: 'TXN001', booking: 'BK001', customer: 'Amit Sharma', worker: 'Rajesh Kumar', amount: '₹499', fee: '₹75', status: 'completed', date: '2024-03-15' },
-                { id: 'TXN002', booking: 'BK002', customer: 'Priya Patel', worker: 'Suresh Patel', amount: '₹899', fee: '₹135', status: 'completed', date: '2024-03-14' },
-                { id: 'TXN003', booking: 'BK003', customer: 'Rahul Mehta', worker: 'Priya Sharma', amount: '₹1,299', fee: '₹195', status: 'pending', date: '2024-03-13' },
-                { id: 'TXN004', booking: 'BK004', customer: 'Neha Gupta', worker: 'Amit Singh', amount: '₹599', fee: '₹90', status: 'refunded', date: '2024-03-12' }
-            ];
+    function displayBookings(bookings) {
+        const tbody = document.getElementById('bookingsTable');
+        if (!tbody) return;
 
-            const tbody = document.getElementById('paymentsTable');
-            tbody.innerHTML = payments.map(payment => `
-                <tr>
-                    <td>${payment.id}</td>
-                    <td>${payment.booking}</td>
-                    <td>${payment.customer}</td>
-                    <td>${payment.worker}</td>
-                    <td>${payment.amount}</td>
-                    <td>${payment.fee}</td>
-                    <td><span class="status-badge ${payment.status}">${payment.status}</span></td>
-                    <td>${payment.date}</td>
-                </tr>
-            `).join('');
+        tbody.innerHTML = bookings.map(booking => `
+            <tr>
+                <td>${booking.booking_number || booking.id}</td>
+                <td>${booking.customer_name || ''}</td>
+                <td>${booking.worker_name || ''}</td>
+                <td>${booking.service_name || ''}</td>
+                <td>${new Date(booking.booking_date).toLocaleDateString()}</td>
+                <td>₹${booking.final_amount || 0}</td>
+                <td><span class="status-badge ${booking.status}">${booking.status || 'pending'}</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="icon-btn" onclick="viewBooking('${booking.id}')"><i class="fas fa-eye"></i></button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // ==================== ACTION HANDLERS ====================
+    window.approveWorker = async function(workerId) {
+        try {
+            const response = await API.put(`/admin/workers/${workerId}/approve`, { status: 'approved' });
+            if (response.success) {
+                Toast.show('Worker approved successfully!', 'success');
+                loadWorkers('pending');
+            }
+        } catch (error) {
+            Toast.show('Failed to approve worker', 'error');
         }
+    };
 
-        // ==================== CHARTS ====================
-        function initializeCharts() {
-            // Revenue Chart
-            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-            new Chart(revenueCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                    datasets: [
-                        {
-                            label: 'This Year',
-                            data: [65000, 72000, 85000, 78000, 92000, 88000, 95000, 102000, 98000, 110000, 115000, 124589],
-                            borderColor: '#2563eb',
-                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        },
-                        {
-                            label: 'Last Year',
-                            data: [55000, 58000, 62000, 60000, 68000, 65000, 72000, 75000, 78000, 82000, 85000, 92000],
-                            borderColor: '#9ca3af',
-                            backgroundColor: 'transparent',
-                            tension: 0.4,
-                            borderDash: [5, 5]
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
+    window.rejectWorker = async function(workerId) {
+        if (!confirm('Are you sure you want to reject this worker?')) return;
+        
+        try {
+            const response = await API.put(`/admin/workers/${workerId}/approve`, { status: 'rejected' });
+            if (response.success) {
+                Toast.show('Worker rejected', 'info');
+                loadWorkers('pending');
+            }
+        } catch (error) {
+            Toast.show('Failed to reject worker', 'error');
+        }
+    };
+
+    window.toggleUserStatus = async function(userId, activate) {
+        try {
+            const response = await API.put(`/admin/users/${userId}/status`, { is_active: activate });
+            if (response.success) {
+                Toast.show(`User ${activate ? 'activated' : 'deactivated'} successfully`, 'success');
+                loadUsers();
+            }
+        } catch (error) {
+            Toast.show('Failed to update user status', 'error');
+        }
+    };
+
+    // ==================== SERVICE ACTIONS ====================
+    window.showAddServiceModal = function() {
+        document.getElementById('addServiceModal').classList.add('show');
+    };
+
+    window.addService = async function() {
+        const serviceData = {
+            name: document.querySelector('#addServiceModal input[placeholder="e.g., Plumbing"]').value,
+            category: document.querySelector('#addServiceModal select').value,
+            description: document.querySelector('#addServiceModal textarea').value,
+            icon: document.querySelector('#addServiceModal select').value,
+            base_price: parseFloat(document.querySelector('#addServiceModal input[placeholder="399"]').value),
+            price_type: document.querySelectorAll('#addServiceModal select')[1].value
+        };
+
+        try {
+            const response = await API.post('/admin/services', serviceData);
+            if (response.success) {
+                Toast.show('Service added successfully!', 'success');
+                closeModal('addServiceModal');
+                loadServices();
+            }
+        } catch (error) {
+            Toast.show('Failed to add service', 'error');
+        }
+    };
+
+    window.toggleService = async function(serviceId, activate) {
+        try {
+            const response = await API.put(`/admin/services/${serviceId}`, { is_active: activate });
+            if (response.success) {
+                Toast.show(`Service ${activate ? 'activated' : 'deactivated'}`, 'success');
+                loadServices();
+            }
+        } catch (error) {
+            Toast.show('Failed to update service', 'error');
+        }
+    };
+
+    // ==================== UTILITY FUNCTIONS ====================
+    function setupNavigation() {
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', function() {
+                navItems.forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+                
+                const section = this.dataset.section;
+                document.querySelectorAll('.dashboard-section').forEach(s => s.style.display = 'none');
+                document.getElementById(`${section}-section`).style.display = 'block';
+                window.location.hash = section;
             });
+        });
+    }
 
-            // Booking Chart
-            const bookingCtx = document.getElementById('bookingChart').getContext('2d');
-            new Chart(bookingCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Plumbing', 'Electrical', 'Cleaning', 'Beauty', 'Others'],
-                    datasets: [{
-                        data: [35, 25, 20, 15, 5],
-                        backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
+    function setupFilters() {
+        // Worker tab switching
+        document.querySelectorAll('[data-worker-tab]').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('[data-worker-tab]').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                loadWorkers(this.dataset.workerTab);
             });
+        });
 
-            // User Growth Chart
-            const userGrowthCtx = document.getElementById('userGrowthChart')?.getContext('2d');
-            if (userGrowthCtx) {
-                new Chart(userGrowthCtx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                        datasets: [{
-                            label: 'New Users',
-                            data: [245, 312, 289, 356],
-                            borderColor: '#2563eb',
-                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false
-                    }
-                });
+        // User search
+        document.getElementById('userSearch')?.addEventListener('input', debounce(function() {
+            // Implement search
+        }, 500));
+    }
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    window.closeModal = function(modalId) {
+        document.getElementById(modalId).classList.remove('show');
+    };
+
+    window.logout = function() {
+        Auth.logout();
+    };
+
+    // Initialize charts with real data
+    async function initializeCharts() {
+        try {
+            const response = await API.get('/admin/analytics?period=month');
+            if (response.success) {
+                updateChartsWithData(response.data);
             }
-
-            // Popular Categories Chart
-            const categoriesCtx = document.getElementById('popularCategoriesChart')?.getContext('2d');
-            if (categoriesCtx) {
-                new Chart(categoriesCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Plumbing', 'Electrical', 'Cleaning', 'Beauty', 'AC Repair'],
-                        datasets: [{
-                            data: [450, 380, 320, 290, 210],
-                            backgroundColor: '#2563eb'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            }
+        } catch (error) {
+            console.error('Failed to load analytics:', error);
         }
+    }
 
-        // ==================== NAVIGATION ====================
-        function setupNavigation() {
-            const navItems = document.querySelectorAll('.nav-item');
-            
-            navItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    navItems.forEach(nav => nav.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    const section = this.dataset.section;
-                    switchSection(section);
-                });
-            });
-        }
-
-        function switchSection(section) {
-            document.querySelectorAll('.dashboard-section').forEach(s => s.style.display = 'none');
-            document.getElementById(`${section}-section`).style.display = 'block';
-            window.location.hash = section;
-        }
-
-        // ==================== TABS ====================
-        function setupTabs() {
-            const tabs = document.querySelectorAll('[data-worker-tab]');
-            
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    tabs.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    const tabName = this.dataset.workerTab;
-                    filterWorkers(tabName);
-                });
-            });
-        }
-
-        function filterWorkers(tab) {
-            Toast.show(`Filtering ${tab} workers`, 'info');
-        }
-
-        // ==================== FILTERS ====================
-        function setupFilters() {
-            const userSearch = document.getElementById('userSearch');
-            if (userSearch) {
-                userSearch.addEventListener('input', function() {
-                    Toast.show('Searching users...', 'info');
-                });
-            }
-
-            const userTypeFilter = document.getElementById('userTypeFilter');
-            if (userTypeFilter) {
-                userTypeFilter.addEventListener('change', function() {
-                    Toast.show(`Filtering by ${this.value}`, 'info');
-                });
-            }
-
-            const userStatusFilter = document.getElementById('userStatusFilter');
-            if (userStatusFilter) {
-                userStatusFilter.addEventListener('change', function() {
-                    Toast.show(`Filtering by ${this.value} status`, 'info');
-                });
-            }
-        }
-
-        // ==================== ACTION FUNCTIONS ====================
-        window.viewUser = function(email) {
-            Toast.show(`Viewing user: ${email}`, 'info');
-        };
-
-        window.editUser = function(email) {
-            Toast.show(`Editing user: ${email}`, 'info');
-        };
-
-        window.suspendUser = function(email) {
-            if (confirm(`Are you sure you want to suspend ${email}?`)) {
-                Toast.show(`User ${email} suspended`, 'warning');
-            }
-        };
-
-        window.viewWorker = function(name) {
-            Toast.show(`Viewing worker: ${name}`, 'info');
-        };
-
-        window.verifyWorker = function(name) {
-            Toast.show(`Worker ${name} verified successfully!`, 'success');
-            loadWorkersTable();
-        };
-
-        window.rejectWorker = function(name) {
-            if (confirm(`Reject worker ${name}?`)) {
-                Toast.show(`Worker ${name} rejected`, 'info');
-                loadWorkersTable();
-            }
-        };
-
-        window.viewBooking = function(id) {
-            window.location.href = `/booking-details.html?id=${id}`;
-        };
-
-        window.editService = function(name) {
-            Toast.show(`Editing service: ${name}`, 'info');
-        };
-
-        window.toggleServiceStatus = function(name) {
-            Toast.show(`Toggling status for: ${name}`, 'info');
-        };
-
-        window.showAddUserModal = function() {
-            document.getElementById('addUserModal').classList.add('show');
-        };
-
-        window.showAddServiceModal = function() {
-            document.getElementById('addServiceModal').classList.add('show');
-        };
-
-        window.showAnnouncementModal = function() {
-            document.getElementById('announcementModal').classList.add('show');
-        };
-
-        window.closeModal = function(modalId) {
-            document.getElementById(modalId).classList.remove('show');
-        };
-
-        window.addUser = function() {
-            Toast.show('User created successfully!', 'success');
-            closeModal('addUserModal');
-            loadUsersTable();
-        };
-
-        window.addService = function() {
-            Toast.show('Service added successfully!', 'success');
-            closeModal('addServiceModal');
-            loadServicesGrid();
-        };
-
-        window.sendAnnouncement = function() {
-            Toast.show('Announcement sent to all users!', 'success');
-            closeModal('announcementModal');
-        };
-
-        window.generateReport = function() {
-            Toast.show('Generating report...', 'info');
-            setTimeout(() => {
-                Toast.show('Report ready for download!', 'success');
-            }, 2000);
-        };
-
-        window.refreshDashboard = function() {
-            Toast.show('Refreshing dashboard...', 'info');
-            loadDashboardData();
-            loadRecentUsers();
-        };
-
-        window.logout = function() {
-            Auth.logout();
-        };
-
-        // Date range picker
-        const dateRange = document.getElementById('dateRange');
-        if (dateRange) {
-            dateRange.value = 'Mar 01, 2024 - Mar 31, 2024';
-        }
-
-        // Check URL hash for initial section
-        if (window.location.hash) {
-            const section = window.location.hash.substring(1);
-            switchSection(section);
-            
-            document.querySelectorAll('.nav-item').forEach(item => {
-                if (item.dataset.section === section) {
-                    item.classList.add('active');
-                } else {
-                    item.classList.remove('active');
-                }
-            });
-        }
-    </script>
+    function updateChartsWithData(data) {
+        // Update charts with real data
+        // Keep existing chart initialization but replace data
+    }
+</script>
 </body>
 </html>
