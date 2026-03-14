@@ -1076,11 +1076,10 @@
             </div>
         </div>
     </footer>
-
-    <!-- Toast Container -->
+      <!-- Toast Container -->
     <div id="toast" class="toast"></div>
 
-    <!-- Load app.js FIRST -->
+    <!-- Load app.js FIRST - this contains the REAL ServicesAPI -->
     <script src="app.js"></script>
     
     <script>
@@ -1120,6 +1119,8 @@
         const itemsPerPage = 9;
 
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ Services page loaded');
+            console.log('🔍 ServicesAPI available:', typeof ServicesAPI !== 'undefined');
             loadServices();
             setupEventListeners();
         });
@@ -1130,19 +1131,32 @@
             const category = urlParams.get('category');
             const search = urlParams.get('q');
             
+            console.log('📥 Loading services with filters:', { category, search });
+            
             try {
                 showSkeleton();
                 
+                // Check if ServicesAPI is available
+                if (typeof ServicesAPI === 'undefined') {
+                    console.error('❌ ServicesAPI not found - app.js may not be loaded');
+                    Toast.show('API connection error', 'error');
+                    return;
+                }
+                
                 // Use the REAL ServicesAPI from app.js
                 const response = await ServicesAPI.getAll(category, search);
+                console.log('✅ API Response:', response);
                 
                 if (response && response.data) {
                     allServices = response.data;
+                    console.log(`📊 Loaded ${allServices.length} services from API`);
                 } else {
+                    console.warn('⚠️ No data in response, using empty array');
                     allServices = [];
                 }
                 
                 applyFilters();
+                initializeCategoryFilters();
                 
                 // Update UI with search params
                 if (category) {
@@ -1154,11 +1168,14 @@
                     document.getElementById('filterSearch').value = search;
                 }
             } catch (error) {
-                console.error('Failed to load services:', error);
-                Toast.show('Failed to load services. Using offline mode.', 'warning');
+                console.error('❌ Failed to load services:', error);
+                Toast.show('Failed to load services: ' + error.message, 'error');
+                
                 // Fallback to mock data if API fails
+                console.warn('⚠️ Using mock data as fallback');
                 allServices = generateMockServices();
                 applyFilters();
+                initializeCategoryFilters();
             }
         }
 
@@ -1167,14 +1184,12 @@
             const categories = [
                 'Plumbing', 'Electrical', 'Painting', 'Cleaning', 
                 'Carpentry', 'Beauty', 'AC Repair', 'Tutoring',
-                'Home Nurse', 'Security', 'Yoga', 'Photography',
-                'Web Development', 'App Development', 'CCTV Installation'
+                'Home Nurse', 'Security', 'Yoga', 'Photography'
             ];
             
-            const cities = ['Mumbai', 'Delhi', 'Bangalore', 'Pune', 'Chennai', 'Kolkata', 'Hyderabad', 'Ahmedabad'];
             const services = [];
             
-            for (let i = 1; i <= 24; i++) {
+            for (let i = 1; i <= 12; i++) {
                 const category = categories[Math.floor(Math.random() * categories.length)];
                 const rating = (3.5 + Math.random() * 1.5).toFixed(1);
                 const bookings = Math.floor(Math.random() * 500) + 50;
@@ -1184,16 +1199,16 @@
                     id: i,
                     name: `${category} Service`,
                     category: category,
-                    description: `Professional ${category.toLowerCase()} service for your home. Quality work guaranteed.`,
+                    description: `Professional ${category.toLowerCase()} service.`,
                     rating: parseFloat(rating),
                     total_bookings: bookings,
                     base_price: price,
-                    worker_count: Math.floor(Math.random() * 20) + 1,
                     image: `https://source.unsplash.com/300x200/?${category.toLowerCase()}`,
-                    providerName: `Provider ${i}`,
+                    provider_name: `Provider ${i}`,
+                    provider_initial: `P${i}`,
                     availableToday: Math.random() > 0.3,
                     verified: Math.random() > 0.2,
-                    city: cities[Math.floor(Math.random() * cities.length)]
+                    city: ['Mumbai', 'Delhi', 'Bangalore'][Math.floor(Math.random() * 3)]
                 });
             }
             return services;
@@ -1201,6 +1216,7 @@
 
         // Apply all filters and sorting
         function applyFilters() {
+            console.log('🔍 Applying filters...');
             filteredServices = [...allServices];
             
             // Get filter values
@@ -1305,7 +1321,7 @@
             }
         }
 
-        // Display services in the grid with pagination
+        // Display services in the grid
         function renderServices() {
             const servicesGrid = document.getElementById('servicesGrid');
             
@@ -1340,7 +1356,7 @@
                         
                         <div class="service-meta">
                             <span class="service-rating">
-                                <i class="fas fa-star"></i> ${service.rating || 'New'}
+                                <i class="fas fa-star"></i> ${service.rating ? service.rating.toFixed(1) : 'New'}
                             </span>
                             <span class="service-bookings">
                                 <i class="fas fa-users"></i> ${service.total_bookings || 0}+ bookings
@@ -1435,6 +1451,8 @@
 
         // Initialize category filters from data
         function initializeCategoryFilters() {
+            if (!allServices || allServices.length === 0) return;
+            
             const categories = [...new Set(allServices.map(s => s.category))];
             const container = document.getElementById('categoryFilters');
             
@@ -1466,7 +1484,7 @@
 
         // Book service
         window.bookService = function(serviceId) {
-            const user = Auth.getUser();
+            const user = typeof Auth !== 'undefined' ? Auth.getUser() : null;
             
             if (!user) {
                 Toast.show('Please login to book a service', 'warning');
@@ -1548,7 +1566,9 @@
             document.getElementById('citySelect')?.addEventListener('change', applyFilters);
 
             // Sort select
-            document.getElementById('sortBy')?.addEventListener('change', applyFilters);
+            document.getElementById('sortBy')?.addEventListener('change', function() {
+                applyFilters();
+            });
 
             // Price range inputs
             document.getElementById('minPrice')?.addEventListener('change', applyFilters);
