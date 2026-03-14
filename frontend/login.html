@@ -935,21 +935,29 @@
                 }
             });
             
-            // Social login handlers
-            document.getElementById('googleLogin').addEventListener('click', function() {
-                Toast.show('Google login coming soon!', 'info');
-                // Implement Google OAuth
-            });
-            
-            document.getElementById('facebookLogin').addEventListener('click', function() {
-                Toast.show('Facebook login coming soon!', 'info');
-                // Implement Facebook OAuth
-            });
-            
-            document.getElementById('githubLogin').addEventListener('click', function() {
-                Toast.show('GitHub login coming soon!', 'info');
-                // Implement GitHub OAuth
-            });
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    try {
+        await Auth.login(email, password);
+    } catch (error) {
+        console.error('Login failed:', error);
+    }
+});
+
+// Social login handlers remain the same
+document.getElementById('googleLogin').addEventListener('click', () => Toast.show('Google login coming soon!', 'info'));
+document.getElementById('facebookLogin').addEventListener('click', () => Toast.show('Facebook login coming soon!', 'info'));
+document.getElementById('githubLogin').addEventListener('click', () => Toast.show('GitHub login coming soon!', 'info'));
+
+// Remember me functionality
+const savedEmail = localStorage.getItem('savedEmail');
+if (savedEmail) {
+    document.getElementById('email').value = savedEmail;
+    document.getElementById('rememberMe').checked = true;
+}
             
             // Check for saved email if "remember me" was checked
             const savedEmail = localStorage.getItem('savedEmail');
