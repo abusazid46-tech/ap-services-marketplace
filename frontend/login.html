@@ -768,265 +768,119 @@
 
     <!-- Toast Container -->
     <div id="toast" class="toast"></div>
-
-    <script src="app.js"></script>
+<script src="app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // DOM Elements
+    const loginForm = document.getElementById('loginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const togglePassword = document.getElementById('togglePassword');
+    const alertContainer = document.getElementById('alertContainer');
     
-    <script>
-        // ==================== LOGIN PAGE SPECIFIC JAVASCRIPT ====================
-        document.addEventListener('DOMContentLoaded', function() {
-            // DOM Elements
-            const loginForm = document.getElementById('loginForm');
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
-            const loginBtn = document.getElementById('loginBtn');
-            const togglePassword = document.getElementById('togglePassword');
-            const alertContainer = document.getElementById('alertContainer');
-            
-            // Email validation regex
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            
-            // Password toggle functionality
-            togglePassword.addEventListener('click', function() {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-                this.classList.toggle('fa-eye');
-                this.classList.toggle('fa-eye-slash');
-            });
-            
-            // Real-time validation
-            emailInput.addEventListener('input', function() {
-                validateEmail(this.value, false);
-            });
-            
-            passwordInput.addEventListener('input', function() {
-                validatePassword(this.value, false);
-            });
-            
-            // Email validation function
-            function validateEmail(email, showError = true) {
-                const errorElement = document.getElementById('emailError');
-                
-                if (!email || email.trim() === '') {
-                    if (showError) {
-                        errorElement.innerHTML = '<i class="fas fa-exclamation-circle"></i> Email is required';
-                        emailInput.classList.add('error');
-                    }
-                    return false;
-                } else if (!emailRegex.test(email)) {
-                    if (showError) {
-                        errorElement.innerHTML = '<i class="fas fa-exclamation-circle"></i> Please enter a valid email address';
-                        emailInput.classList.add('error');
-                    }
-                    return false;
-                } else {
-                    errorElement.innerHTML = '';
-                    emailInput.classList.remove('error');
-                    return true;
-                }
-            }
-            
-            // Password validation function
-            function validatePassword(password, showError = true) {
-                const errorElement = document.getElementById('passwordError');
-                
-                if (!password || password.trim() === '') {
-                    if (showError) {
-                        errorElement.innerHTML = '<i class="fas fa-exclamation-circle"></i> Password is required';
-                        passwordInput.classList.add('error');
-                    }
-                    return false;
-                } else if (password.length < 6) {
-                    if (showError) {
-                        errorElement.innerHTML = '<i class="fas fa-exclamation-circle"></i> Password must be at least 6 characters';
-                        passwordInput.classList.add('error');
-                    }
-                    return false;
-                } else {
-                    errorElement.innerHTML = '';
-                    passwordInput.classList.remove('error');
-                    return true;
-                }
-            }
-            
-            // Show alert message
-            function showAlert(message, type) {
-                alertContainer.innerHTML = `
-                    <div class="alert alert-${type}">
-                        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
-                        ${message}
-                    </div>
-                `;
-                
-                // Auto hide after 5 seconds
-                setTimeout(() => {
-                    alertContainer.innerHTML = '';
-                }, 5000);
-            }
-            
-            // Set loading state
-            function setLoading(isLoading) {
-                if (isLoading) {
-                    loginBtn.classList.add('btn-loading');
-                    loginBtn.disabled = true;
-                } else {
-                    loginBtn.classList.remove('btn-loading');
-                    loginBtn.disabled = false;
-                }
-            }
-            
-            // Handle form submission
-            loginForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                // Get form values
-                const email = emailInput.value.trim();
-                const password = passwordInput.value;
-                const rememberMe = document.getElementById('rememberMe').checked;
-                
-                // Validate all fields
-                const isEmailValid = validateEmail(email, true);
-                const isPasswordValid = validatePassword(password, true);
-                
-                if (!isEmailValid || !isPasswordValid) {
-                    showAlert('Please fix the errors above', 'error');
-                    return;
-                }
-                
-                // Show loading state
-                setLoading(true);
-                
-                try {
-                    // Attempt login using Auth service from app.js
-                    const response = await Auth.login(email, password);
-                    
-                    if (response && response.success) {
-                        // Store remember me preference
-                        if (rememberMe) {
-                            localStorage.setItem('rememberMe', 'true');
-                        }
-                        
-                        showAlert('Login successful! Redirecting...', 'success');
-                        
-                        // Redirect is handled in Auth.login
-                    } else {
-                        throw new Error(response?.message || 'Login failed');
-                    }
-                } catch (error) {
-                    console.error('Login error:', error);
-                    
-                    // Handle specific error messages
-                    let errorMessage = 'Invalid email or password';
-                    
-                    if (error.message.includes('not found')) {
-                        errorMessage = 'Account not found. Please sign up.';
-                    } else if (error.message.includes('inactive')) {
-                        errorMessage = 'Your account has been deactivated. Please contact support.';
-                    } else if (error.message.includes('password')) {
-                        errorMessage = 'Incorrect password. Please try again.';
-                    }
-                    
-                    showAlert(errorMessage, 'error');
-                    
-                    // Shake animation for form on error
-                    loginForm.classList.add('shake');
-                    setTimeout(() => loginForm.classList.remove('shake'), 500);
-                } finally {
-                    setLoading(false);
-                }
-            });
-            
-      document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+    // Email validation regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     
-    try {
-        await Auth.login(email, password);
-    } catch (error) {
-        console.error('Login failed:', error);
+    // Password toggle
+    togglePassword.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
+    });
+    
+    // Remember me - load saved email
+    const savedEmail = localStorage.getItem('savedEmail');
+    if (savedEmail) {
+        emailInput.value = savedEmail;
+        document.getElementById('rememberMe').checked = true;
+    }
+    
+    // Check URL parameters for messages
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('registered') === 'success') {
+        showAlert('Registration successful! Please login.', 'success');
+    } else if (urlParams.get('reset') === 'success') {
+        showAlert('Password reset successful! Please login.', 'success');
+    }
+    
+    // Show alert function
+    function showAlert(message, type) {
+        alertContainer.innerHTML = `
+            <div class="alert alert-${type}">
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                ${message}
+            </div>
+        `;
+        setTimeout(() => alertContainer.innerHTML = '', 5000);
+    }
+    
+    // ========== SINGLE FORM SUBMISSION ==========
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+        const rememberMe = document.getElementById('rememberMe').checked;
+        
+        // Simple validation
+        if (!email || !password) {
+            showAlert('Please enter both email and password', 'error');
+            return;
+        }
+        
+        try {
+            // Call Auth.login from app.js
+            await Auth.login(email, password);
+            
+            // Save email if remember me is checked
+            if (rememberMe) {
+                localStorage.setItem('savedEmail', email);
+            } else {
+                localStorage.removeItem('savedEmail');
+            }
+            
+        } catch (error) {
+            console.error('Login failed:', error);
+            showAlert(error.message || 'Login failed', 'error');
+        }
+    });
+    
+    // Social login handlers
+    document.getElementById('googleLogin').addEventListener('click', () => 
+        Toast.show('Google login coming soon!', 'info'));
+    document.getElementById('facebookLogin').addEventListener('click', () => 
+        Toast.show('Facebook login coming soon!', 'info'));
+    document.getElementById('githubLogin').addEventListener('click', () => 
+        Toast.show('GitHub login coming soon!', 'info'));
+    
+    // Demo credentials (development only)
+    if (window.location.hostname === 'localhost') {
+        const demoBtn = document.createElement('div');
+        demoBtn.style.marginTop = '10px';
+        demoBtn.style.textAlign = 'center';
+        demoBtn.innerHTML = `
+            <button class="btn-outline btn-small" onclick="fillDemoCredentials()" style="font-size: 0.8rem;">
+                <i class="fas fa-flask"></i> Fill Demo
+            </button>
+        `;
+        document.querySelector('.auth-card').appendChild(demoBtn);
     }
 });
 
-// Social login handlers remain the same
-document.getElementById('googleLogin').addEventListener('click', () => Toast.show('Google login coming soon!', 'info'));
-document.getElementById('facebookLogin').addEventListener('click', () => Toast.show('Facebook login coming soon!', 'info'));
-document.getElementById('githubLogin').addEventListener('click', () => Toast.show('GitHub login coming soon!', 'info'));
-
-// Remember me functionality
-const savedEmail = localStorage.getItem('savedEmail');
-if (savedEmail) {
-    document.getElementById('email').value = savedEmail;
-    document.getElementById('rememberMe').checked = true;
+// Demo credentials function
+function fillDemoCredentials() {
+    document.getElementById('email').value = 'customer@demo.com';
+    document.getElementById('password').value = 'password123';
+    Toast.show('Demo credentials filled!', 'info');
 }
-            
-            // Check for saved email if "remember me" was checked
-            const savedEmail = localStorage.getItem('savedEmail');
-            if (savedEmail) {
-                emailInput.value = savedEmail;
-                document.getElementById('rememberMe').checked = true;
-            }
-            
-            // Check URL parameters for messages
-            const urlParams = new URLSearchParams(window.location.search);
-            const registered = urlParams.get('registered');
-            const reset = urlParams.get('reset');
-            
-            if (registered === 'success') {
-                showAlert('Registration successful! Please login.', 'success');
-                // Clean URL
-                window.history.replaceState({}, document.title, '/login.html');
-            } else if (reset === 'success') {
-                showAlert('Password reset successful! Please login.', 'success');
-                window.history.replaceState({}, document.title, '/login.html');
-            }
-            
-            // Add shake animation keyframes if not exists
-            if (!document.querySelector('#shake-keyframes')) {
-                const style = document.createElement('style');
-                style.id = 'shake-keyframes';
-                style.textContent = `
-                    @keyframes shake {
-                        0%, 100% { transform: translateX(0); }
-                        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-                        20%, 40%, 60%, 80% { transform: translateX(5px); }
-                    }
-                    .shake {
-                        animation: shake 0.5s ease;
-                    }
-                `;
-                document.head.appendChild(style);
-            }
-            
-            // Pre-fill demo credentials for testing (remove in production)
-            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                const demoBtn = document.createElement('div');
-                demoBtn.style.marginTop = '10px';
-                demoBtn.style.textAlign = 'center';
-                demoBtn.innerHTML = `
-                    <button class="btn-outline btn-small" onclick="fillDemoCredentials()" style="font-size: 0.8rem;">
-                        <i class="fas fa-flask"></i> Fill Demo Credentials
-                    </button>
-                `;
-                loginForm.appendChild(demoBtn);
-            }
-        });
-        
-        // Demo credentials function (for development only)
-        function fillDemoCredentials() {
-            document.getElementById('email').value = 'customer@demo.com';
-            document.getElementById('password').value = 'password123';
-            Toast.show('Demo credentials filled!', 'info');
-        }
-        
-        // Handle forgot password redirect
-        document.querySelector('.forgot-password').addEventListener('click', function(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value.trim();
-            if (email && emailRegex.test(email)) {
-                localStorage.setItem('resetEmail', email);
-            }
-            window.location.href = '/forgot-password.html';
-        });
-    </script>
+
+// Forgot password
+document.querySelector('.forgot-password')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    window.location.href = '/forgot-password.html';
+});
+</script>
+   
 </body>
 </html>
